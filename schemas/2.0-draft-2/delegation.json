@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/delegation.json",
+  "title": "HCP delegation",
+  "description": "One person's authority to act as Authorizing Principal for the Context Subject. Defined in 17.2 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "delegationId": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "delegate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "relationship": {
+      "anyOf": [
+        {
+          "enum": [
+            "parent-or-guardian",
+            "legal-guardian",
+            "attorney-in-fact",
+            "caregiver"
+          ]
+        },
+        {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+        }
+      ]
+    },
+    "basis": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "enum": [
+            "appointed",
+            "attested",
+            "evidence",
+            "unspecified"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/evidenceItem"
+          }
+        },
+        "covers": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/category"
+          }
+        },
+        "establishedBy": {
+          "type": "string"
+        },
+        "establishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "method",
+        "description",
+        "establishedBy",
+        "establishedAt"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "evidence"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "evidence"
+            ]
+          }
+        }
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/category"
+          },
+          "minItems": 1
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/action"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "categories",
+        "actions"
+      ]
+    },
+    "term": {
+      "type": "object",
+      "properties": {
+        "endsAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "atMajority": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "endsAt",
+        "atMajority"
+      ]
+    },
+    "ended": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "enum": [
+            "majority",
+            "expiry",
+            "basis-ended",
+            "relinquished",
+            "ended-by-subject"
+          ]
+        }
+      },
+      "required": [
+        "at",
+        "reason"
+      ]
+    }
+  },
+  "required": [
+    "delegationId",
+    "subject",
+    "delegate",
+    "relationship",
+    "basis",
+    "scope",
+    "term"
+  ]
+}

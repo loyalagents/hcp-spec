@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/minimization-report.json",
+  "title": "HCP minimization report",
+  "description": "The minimization report carried by query and get-entry results. Defined in 7.5 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "allOf": [
+    {
+      "$ref": "common.json#/$defs/minimization"
+    }
+  ]
+}

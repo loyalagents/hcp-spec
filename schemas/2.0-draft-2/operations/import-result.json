@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/import-result.json",
+  "title": "Import result",
+  "description": "Import result. Defined in 5.4.3, 9.4.11 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "imported",
+              "converted",
+              "skipped",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "outcome"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "outcome": {
+                  "const": "rejected"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "dryRun": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "outcomes"
+  ]
+}

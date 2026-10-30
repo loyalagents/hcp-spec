@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/discovery.json",
+  "title": "HCP discovery document",
+  "description": "The discovery document every conforming implementation publishes. Not listed in 25.2. Defined in 19 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "hcp_version": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "provider_operator": {
+      "$ref": "common.json#/$defs/named"
+    },
+    "conformsTo": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+      },
+      "minItems": 1
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "http",
+          "mcp"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "protected_resource_metadata": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "jwks_uri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "entries_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "grants_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "audit_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "export_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "delegations_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "rules_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "mcp_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "supported_categories": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/category"
+      },
+      "minItems": 1
+    },
+    "category_registry": {
+      "type": "string"
+    },
+    "accepts_entry_schemas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+      },
+      "minItems": 1
+    },
+    "minimization_method": {
+      "type": "string",
+      "not": {
+        "const": "none"
+      }
+    },
+    "conflict_detection": {
+      "type": "string"
+    },
+    "audit_durability": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "const": "synchronous"
+        },
+        "bounded": {
+          "type": "object",
+          "properties": {
+            "context.read": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "default"
+      ]
+    },
+    "audit_integrity": {
+      "enum": [
+        "append-only",
+        "hash-chained",
+        "signed-checkpoints",
+        "anchored"
+      ]
+    },
+    "pagination": {
+      "type": "object",
+      "properties": {
+        "audit": {
+          "const": "cursor"
+        }
+      }
+    },
+    "problem_type_base": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "rate_limits": {
+      "type": "object",
+      "properties": {
+        "documentation_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+        }
+      }
+    },
+    "vc_securing": {
+      "type": "object",
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "eddsa-rdfc-2022",
+              "ecdsa-sd-2023",
+              "vc-jose-cose"
+            ]
+          }
+        },
+        "verifies": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "eddsa-rdfc-2022",
+              "ecdsa-sd-2023",
+              "vc-jose-cose"
+            ]
+          },
+          "contains": {
+            "const": "eddsa-rdfc-2022"
+          }
+        }
+      },
+      "required": [
+        "issues",
+        "verifies"
+      ]
+    },
+    "credential_status_interval": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    }
+  },
+  "required": [
+    "hcp_version",
+    "provider",
+    "provider_operator",
+    "conformsTo",
+    "bindings",
+    "jwks_uri",
+    "supported_categories",
+    "category_registry",
+    "accepts_entry_schemas",
+    "minimization_method",
+    "audit_durability",
+    "audit_integrity"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bindings": {
+            "contains": {
+              "const": "http"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "entries_endpoint",
+          "grants_endpoint",
+          "audit_endpoint",
+          "export_endpoint",
+          "rules_endpoint",
+          "pagination",
+          "problem_type_base"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "conformsTo": {
+            "contains": {
+              "const": "https://hcp.example/spec/profiles/vc-evidence/2.0"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "vc_securing",
+          "credential_status_interval"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "conformsTo": {
+            "contains": {
+              "const": "https://hcp.example/spec/profiles/memory-manager/2.0"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "conflict_detection"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "conformsTo": {
+            "contains": {
+              "const": "https://hcp.example/spec/profiles/oauth-interop/2.0"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "protected_resource_metadata"
+        ]
+      }
+    }
+  ]
+}

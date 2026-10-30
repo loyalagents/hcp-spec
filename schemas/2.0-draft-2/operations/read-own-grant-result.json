@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/read-own-grant-result.json",
+  "title": "Read own grant result",
+  "description": "Read own grant result. Defined in 5.2.6 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "$ref": "../grant.json"
+}

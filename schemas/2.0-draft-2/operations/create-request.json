@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/create-request.json",
+  "title": "Create request",
+  "description": "Create request. Defined in 5.2.3, 9.4.3 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "https://hcp.example/spec/entry/2.0"
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "content": {
+      "$ref": "../common.json#/$defs/content"
+    },
+    "evidence": {
+      "$ref": "../common.json#/$defs/evidence"
+    },
+    "classification": {
+      "$ref": "../common.json#/$defs/classification"
+    },
+    "assertion": {
+      "$ref": "../common.json#/$defs/assertion"
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "assertedBy": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "assertedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "../common.json#/$defs/relationshipType"
+              },
+              "target": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "target"
+            ]
+          }
+        }
+      },
+      "required": [
+        "provenance"
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "subject",
+    "content",
+    "classification",
+    "assertion",
+    "record"
+  ],
+  "$comment": "An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider."
+}

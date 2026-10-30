@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/query-result.json",
+  "title": "Query result",
+  "description": "Query result. Defined in 5.2.1 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "entries": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "../disclosure.json"
+          },
+          {
+            "$ref": "../entry.json"
+          }
+        ],
+        "description": "A disclosure where the requester is a Context Client (7.4); otherwise the entry."
+      },
+      "maxItems": 20
+    },
+    "retrievalId": {
+      "$ref": "../common.json#/$defs/urnUuid"
+    },
+    "minimization": {
+      "$ref": "../common.json#/$defs/minimization"
+    },
+    "categoriesSearched": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.json#/$defs/category"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "entries",
+    "retrievalId",
+    "minimization",
+    "categoriesSearched",
+    "timestamp"
+  ]
+}

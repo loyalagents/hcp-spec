@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/grant.json",
+  "title": "HCP grant",
+  "description": "The record of an authorization. Defined in 6.1.5 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "grantId": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "authorizingPrincipal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "delegation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "client": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operator": {
+          "$ref": "common.json#/$defs/named"
+        },
+        "legalRetention": {
+          "$ref": "common.json#/$defs/legalRetention"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "operator"
+      ]
+    },
+    "requestingParty": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "person",
+            "organization"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ]
+    },
+    "access": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/accessDetail"
+      },
+      "minItems": 1
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^hcp:[^:]+(:[^:]+)*:(read|write)$"
+      }
+    },
+    "grantType": {
+      "enum": [
+        "temporary",
+        "persistent"
+      ]
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "active",
+        "revoked",
+        "expired"
+      ]
+    }
+  },
+  "required": [
+    "grantId",
+    "subject",
+    "authorizingPrincipal",
+    "client",
+    "access",
+    "grantType",
+    "issuedAt",
+    "expiresAt",
+    "status"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "grantType": {
+            "const": "temporary"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "grantType": {
+            "const": "persistent"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expiresAt": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

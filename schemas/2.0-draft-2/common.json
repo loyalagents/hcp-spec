@@ -1,0 +1,504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/common.json",
+  "title": "HCP common definitions",
+  "description": "Definitions shared by the HCP schemas. Defined in the sections cited in each definition of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+    },
+    "urnUuid": {
+      "type": "string",
+      "pattern": "^urn:uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+      "description": "A urn:uuid: identifier. Any RFC 4122 version (4.2)."
+    },
+    "category": {
+      "type": "string",
+      "description": "A registered category slug, or a custom category: an absolute URI (4.5).",
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        {
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:"
+        }
+      ]
+    },
+    "purposeCode": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$",
+      "description": "A purpose code: an absolute URI (6.1.5.2)."
+    },
+    "purpose": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "common.json#/$defs/purposeCode"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "description"
+      ],
+      "description": "A purpose with a description the person can read (6.1.5.2)."
+    },
+    "declarationType": {
+      "enum": [
+        "person-declared",
+        "model-inferred",
+        "issuer-attested"
+      ],
+      "description": "4.4"
+    },
+    "assurance": {
+      "enum": [
+        "unverified",
+        "authenticated",
+        "cryptographically-verified"
+      ],
+      "description": "3.6"
+    },
+    "entryStatus": {
+      "enum": [
+        "active",
+        "deprecated",
+        "conflicted",
+        "expired",
+        "revoked",
+        "suspended",
+        "deleted"
+      ],
+      "description": "4.2.4"
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        null
+      ],
+      "description": "4.2"
+    },
+    "relationshipType": {
+      "enum": [
+        "derivedFrom",
+        "supersedes",
+        "contradicts",
+        "duplicates"
+      ],
+      "description": "4.2.3"
+    },
+    "role": {
+      "enum": [
+        "management-client",
+        "context-client",
+        "authorization-service",
+        "hcp-provider"
+      ],
+      "description": "3.9"
+    },
+    "action": {
+      "enum": [
+        "read",
+        "write"
+      ],
+      "description": "6.1.5"
+    },
+    "named": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "clientDescription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "operator": {
+          "$ref": "common.json#/$defs/named"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "operator"
+      ],
+      "description": "An HCP Client and its Client Operator, as recorded (3.5, 3.2.8)."
+    },
+    "legalRetention": {
+      "type": "object",
+      "properties": {
+        "record": {
+          "type": "string"
+        },
+        "obligation": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "record",
+        "obligation",
+        "period"
+      ],
+      "description": "A record the client keeps under a declared legal obligation (6.2.5)."
+    },
+    "credential": {
+      "type": "object",
+      "properties": {
+        "@context": {
+          "type": [
+            "array",
+            "string"
+          ]
+        },
+        "type": {
+          "type": [
+            "array",
+            "string"
+          ]
+        },
+        "issuer": {
+          "type": [
+            "string",
+            "object"
+          ]
+        },
+        "credentialSubject": {
+          "type": [
+            "object",
+            "array"
+          ]
+        }
+      },
+      "required": [
+        "@context",
+        "type",
+        "issuer",
+        "credentialSubject"
+      ],
+      "description": "A W3C Verifiable Credential, held whole as its issuer secured it (4.2.2, 14.2). Its own data model governs its contents."
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "enum": [
+            "verified",
+            "failed"
+          ]
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "result",
+        "at"
+      ],
+      "description": "The HCP Provider's record of its most recent verification (4.2.2). Set only by the provider."
+    },
+    "evidenceItem": {
+      "type": "object",
+      "description": "An evidence item (4.2.2). An item of a type the provider does not recognize is preserved.",
+      "properties": {
+        "role": {
+          "enum": [
+            "content",
+            "supports"
+          ]
+        },
+        "type": {
+          "type": "string"
+        },
+        "credential": true,
+        "verification": {
+          "$ref": "common.json#/$defs/verification"
+        }
+      },
+      "required": [
+        "role",
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "verifiable-credential"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "credential": {
+                "$ref": "common.json#/$defs/credential"
+              }
+            },
+            "required": [
+              "credential"
+            ]
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/evidenceItem"
+      },
+      "contains": {
+        "properties": {
+          "role": {
+            "const": "content"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "minContains": 0,
+      "maxContains": 1,
+      "description": "At most one item whose role is content (4.2.2)."
+    },
+    "content": {
+      "type": "object",
+      "description": "What is said about the Context Subject; its shape is named by its profile (4.2, 11, 14).",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "profile": {
+                "const": "https://hcp.example/spec/profiles/general-context/2.0"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": [
+                  "string",
+                  "object"
+                ]
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "value"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "profile": {
+                "const": "https://hcp.example/spec/profiles/vc-evidence/2.0"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "evidence"
+            ],
+            "not": {
+              "required": [
+                "value"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "assertion": {
+      "type": "object",
+      "description": "What the submitting client states about the assertion (4.2).",
+      "properties": {
+        "declarationType": {
+          "$ref": "common.json#/$defs/declarationType"
+        },
+        "confidence": {
+          "$ref": "common.json#/$defs/confidence"
+        },
+        "validUntil": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "declarationType"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "declarationType": {
+                "const": "model-inferred"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "confidence": {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              }
+            },
+            "required": [
+              "confidence"
+            ]
+          },
+          "else": {
+            "properties": {
+              "confidence": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "classification": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "$ref": "common.json#/$defs/category"
+        },
+        "dimension": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "description": "HCP's classification of the entry (4.2, 4.5)."
+    },
+    "accessDetail": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "https://hcp.example/spec/authorization/context-access"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/action"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/category"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "purposes": {
+          "type": "array",
+          "items": {
+            "$ref": "common.json#/$defs/purpose"
+          },
+          "minItems": 1
+        },
+        "narrowedTo": {
+          "type": "object",
+          "description": "Implementation-defined; only narrows (6.1.5.1)."
+        }
+      },
+      "required": [
+        "type",
+        "actions",
+        "categories",
+        "purposes"
+      ],
+      "description": "An authorization detail (6.1.5); under the OAuth Interop Profile, an RFC 9396 authorization detail (13.3)."
+    },
+    "minimization": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "description": "The minimization report (7.5). It MUST NOT carry any measure of what was withheld, which no schema can check by name."
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/get-entry-result.json",
+  "title": "Get entry result",
+  "description": "Get entry result. Defined in 5.2.2 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "entry": {
+      "anyOf": [
+        {
+          "$ref": "../disclosure.json"
+        },
+        {
+          "$ref": "../entry.json"
+        }
+      ],
+      "description": "A disclosure where the requester is a Context Client (7.4); otherwise the entry."
+    },
+    "retrievalId": {
+      "$ref": "../common.json#/$defs/urnUuid"
+    },
+    "minimization": {
+      "$ref": "../common.json#/$defs/minimization"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "entry",
+    "retrievalId",
+    "minimization",
+    "timestamp"
+  ]
+}

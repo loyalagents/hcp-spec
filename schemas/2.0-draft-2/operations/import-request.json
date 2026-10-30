@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/import-request.json",
+  "title": "Import request",
+  "description": "Import request. Defined in 5.4.3, 9.4.11 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "export": {
+      "type": "object"
+    },
+    "dryRun": {
+      "type": "boolean"
+    },
+    "categoryMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "../common.json#/$defs/category"
+      }
+    }
+  },
+  "required": [
+    "export"
+  ]
+}

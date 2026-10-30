@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/disclosure-summary-result.json",
+  "title": "Disclosure summary result",
+  "description": "Disclosure summary result. Defined in 8.6, 9.4.12 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "clients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "$ref": "../common.json#/$defs/clientDescription"
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "grantId": {
+                  "$ref": "../common.json#/$defs/urnUuid"
+                },
+                "status": {
+                  "enum": [
+                    "active",
+                    "revoked",
+                    "expired"
+                  ]
+                }
+              },
+              "required": [
+                "grantId",
+                "status"
+              ]
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "../common.json#/$defs/category"
+            }
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "$ref": "../common.json#/$defs/purposeCode"
+            }
+          },
+          "entries": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "retrievals": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "firstAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usableUntil": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notification": {
+            "enum": [
+              "delivered",
+              "abandoned",
+              "none"
+            ]
+          },
+          "legalRetention": {
+            "$ref": "../common.json#/$defs/legalRetention"
+          }
+        },
+        "required": [
+          "client",
+          "grants",
+          "categories",
+          "purposes",
+          "entries",
+          "retrievals",
+          "firstAt",
+          "lastAt",
+          "usableUntil",
+          "notification"
+        ]
+      }
+    }
+  },
+  "required": [
+    "clients"
+  ],
+  "$comment": "Member shapes are inferred from the descriptions in 8.6, which fix content but not structure."
+}

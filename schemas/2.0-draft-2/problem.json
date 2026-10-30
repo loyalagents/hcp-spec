@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/problem.json",
+  "title": "HCP problem details",
+  "description": "A Core error as the HTTP Binding carries it: RFC 9457 problem details (9.7). Defined in 9.7 of the HCP v2 specification (2.0-draft-2); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "enum": [
+        "https://hcp.example/problems/malformed-request",
+        "https://hcp.example/problems/invalid-token",
+        "https://hcp.example/problems/scope-denied",
+        "https://hcp.example/problems/idempotency-conflict",
+        "https://hcp.example/problems/version-conflict",
+        "https://hcp.example/problems/credential-invalid",
+        "https://hcp.example/problems/rate-limited",
+        "https://hcp.example/problems/unsupported-version"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        400,
+        401,
+        403,
+        409,
+        422,
+        429
+      ]
+    },
+    "detail": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "title",
+    "status",
+    "detail"
+  ]
+}

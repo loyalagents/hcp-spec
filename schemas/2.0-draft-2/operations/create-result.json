@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-2/operations/create-result.json",
+  "title": "Create result",
+  "description": "A disclosure where the requester is a Context Client (7.4); otherwise the entry.",
+  "anyOf": [
+    {
+      "$ref": "../disclosure.json"
+    },
+    {
+      "$ref": "../entry.json"
+    }
+  ]
+}
