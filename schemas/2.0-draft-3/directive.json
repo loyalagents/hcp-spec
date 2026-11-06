@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/directive.json",
+  "title": "HCP directive",
+  "description": "What a client may do with context it received, or on the Context Subject's behalf. Defined in 6.4 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "directiveId": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "action": {
+      "anyOf": [
+        {
+          "enum": [
+            "share",
+            "sign",
+            "transact"
+          ]
+        },
+        {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+        }
+      ]
+    },
+    "effect": {
+      "enum": [
+        "deny",
+        "ask-first",
+        "permit"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/category"
+      },
+      "minItems": 1
+    },
+    "operators": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "setBy": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "directiveId",
+    "action",
+    "effect",
+    "text",
+    "setBy",
+    "createdAt"
+  ]
+}

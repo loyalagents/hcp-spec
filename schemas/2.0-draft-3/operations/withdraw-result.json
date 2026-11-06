@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/operations/withdraw-result.json",
+  "title": "Withdraw result",
+  "description": "Withdraw result. Defined in 5.2.5, 9.4.5 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string"
+    },
+    "entryId": {
+      "$ref": "../common.json#/$defs/urnUuid"
+    },
+    "status": {
+      "const": "deleted"
+    },
+    "hardDeleted": {
+      "type": "boolean"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "status",
+    "timestamp"
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "ref"
+      ]
+    },
+    {
+      "required": [
+        "entryId"
+      ]
+    }
+  ]
+}

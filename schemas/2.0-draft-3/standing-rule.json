@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/standing-rule.json",
+  "title": "HCP standing rule",
+  "description": "A deny rule the Context Subject sets across every grant. Defined in 6.3 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "ruleId": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "effect": {
+      "const": "deny"
+    },
+    "operators": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/category"
+      },
+      "minItems": 1
+    },
+    "setBy": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requires": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[^\\s]+$"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "ruleId",
+    "effect",
+    "setBy",
+    "createdAt"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "operators"
+      ]
+    },
+    {
+      "required": [
+        "requires"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/entry.json",
+  "title": "HCP entry",
+  "description": "An HCP entry, in the one form a provider emits. Defined in 4.2 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "@context": {
+      "type": [
+        "array",
+        "string"
+      ]
+    },
+    "schema": {
+      "const": "https://hcp.example/spec/entry/2.0"
+    },
+    "id": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "type": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "contains": {
+        "const": "ContextEntry"
+      }
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "relationship": {
+          "type": "null",
+          "description": "Reserved (4.2, 11.3)."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "content": {
+      "$ref": "common.json#/$defs/content"
+    },
+    "assertion": {
+      "$ref": "common.json#/$defs/assertion"
+    },
+    "classification": {
+      "$ref": "common.json#/$defs/classification"
+    },
+    "evidence": {
+      "$ref": "common.json#/$defs/evidence"
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "common.json#/$defs/entryStatus"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "assertedBy": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "assurance": {
+                  "$ref": "common.json#/$defs/assurance"
+                },
+                "via": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "authorization-credential",
+                        "arrangement"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "assurance"
+              ]
+            },
+            "assertedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source": {
+              "type": "string"
+            },
+            "submittedByClient": {
+              "$ref": "common.json#/$defs/clientDescription"
+            },
+            "authorizedUnder": {
+              "type": "string"
+            },
+            "recordedByProvider": {
+              "type": "string"
+            },
+            "recordedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "confirmations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "disposition": {
+                    "enum": [
+                      "confirmed",
+                      "rejected"
+                    ]
+                  },
+                  "confirmedBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "confirmedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "disposition",
+                  "confirmedBy",
+                  "confirmedAt"
+                ]
+              }
+            }
+          },
+          "required": [
+            "assertedBy",
+            "assertedAt",
+            "source",
+            "submittedByClient",
+            "authorizedUnder",
+            "recordedByProvider",
+            "recordedAt"
+          ],
+          "description": "Who asserted, submitted, authorized, recorded and confirmed this version (3.5-3.8)."
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "common.json#/$defs/relationshipType"
+              },
+              "target": {
+                "type": "string"
+              },
+              "assertedBy": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "$ref": "common.json#/$defs/role"
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "role",
+                  "id"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "proposal": {
+                "type": "object",
+                "properties": {
+                  "act": {
+                    "enum": [
+                      "reject",
+                      "accept",
+                      "supersede"
+                    ]
+                  },
+                  "entry": {
+                    "type": "string"
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "weighed": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1
+                  },
+                  "proposedBy": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "$ref": "common.json#/$defs/role"
+                      },
+                      "id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "role",
+                      "id"
+                    ]
+                  },
+                  "proposedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "act",
+                  "entry",
+                  "rationale",
+                  "weighed",
+                  "proposedBy",
+                  "proposedAt"
+                ],
+                "description": "A proposal for resolving a conflict; it changes nothing until the Context Subject acts (4.7.4)."
+              }
+            },
+            "required": [
+              "type",
+              "target",
+              "assertedBy",
+              "recordedAt"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "not": {
+                    "properties": {
+                      "type": {
+                        "const": "contradicts"
+                      }
+                    }
+                  }
+                },
+                "then": {
+                  "not": {
+                    "required": [
+                      "proposal"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "conversion": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string"
+            },
+            "convertedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "convertedBy": {
+              "type": "string"
+            },
+            "unmapped": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "from",
+            "convertedAt",
+            "convertedBy"
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "status",
+        "version",
+        "provenance"
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "id",
+    "type",
+    "subject",
+    "content",
+    "assertion",
+    "classification",
+    "record"
+  ]
+}

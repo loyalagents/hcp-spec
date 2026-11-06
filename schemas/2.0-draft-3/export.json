@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/export.json",
+  "title": "HCP export",
+  "description": "The Context Subject's export, which import takes. Defined in 5.4.1 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "@context": {
+      "type": [
+        "array",
+        "string"
+      ]
+    },
+    "type": {
+      "const": "ContextExport"
+    },
+    "schema": {
+      "const": "https://hcp.example/spec/export/2.0"
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "exportedBy": {
+      "type": "string"
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "excludeDeleted": {
+          "type": "boolean"
+        },
+        "includeVersions": {
+          "type": "boolean"
+        },
+        "includeAudit": {
+          "type": "boolean"
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Entries in any schema the importing provider accepts (4.3); each validated against that schema."
+    },
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "standing-rule.json"
+      }
+    },
+    "directives": {
+      "type": "array",
+      "items": {
+        "$ref": "directive.json"
+      }
+    },
+    "delegations": {
+      "type": "array",
+      "items": {
+        "$ref": "delegation.json"
+      }
+    },
+    "audit": {
+      "type": "array",
+      "items": {
+        "$ref": "audit-event.json"
+      }
+    }
+  },
+  "required": [
+    "@context",
+    "type",
+    "schema",
+    "subject",
+    "exportedBy",
+    "exportedAt",
+    "entries",
+    "rules"
+  ]
+}

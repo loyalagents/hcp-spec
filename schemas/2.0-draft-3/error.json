@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/error.json",
+  "title": "HCP Core error",
+  "description": "A Core error as a binding carries it: the MCP Binding's structuredContent of a tool execution error (10.4). Defined in 5.5, 10.4 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "enum": [
+        "malformed-request",
+        "invalid-token",
+        "scope-denied",
+        "idempotency-conflict",
+        "version-conflict",
+        "credential-invalid",
+        "rate-limited",
+        "unsupported-version",
+        "subject-unavailable"
+      ]
+    },
+    "detail": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "detail"
+  ]
+}

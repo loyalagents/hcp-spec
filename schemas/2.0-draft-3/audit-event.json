@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/audit-event.json",
+  "title": "HCP audit event",
+  "description": "One event in the Context Subject's audit log. Not listed in 25.2; offered for the conformance suite. Defined in 8.2 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "$ref": "common.json#/$defs/urnUuid"
+    },
+    "eventType": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "participants": {
+      "type": "object",
+      "properties": {
+        "initiator": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "$ref": "common.json#/$defs/role"
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "role",
+            "id"
+          ]
+        },
+        "clientOperator": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "requestingParty": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "authorizingPrincipal": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "provider": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "retrievalId": {
+          "$ref": "common.json#/$defs/urnUuid"
+        },
+        "model": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "required": [
+        "initiator",
+        "provider"
+      ]
+    },
+    "entryId": {
+      "anyOf": [
+        {
+          "$ref": "common.json#/$defs/urnUuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "relatedEntryId": {
+      "anyOf": [
+        {
+          "$ref": "common.json#/$defs/urnUuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "common.json#/$defs/category"
+      }
+    },
+    "purpose": {
+      "anyOf": [
+        {
+          "$ref": "common.json#/$defs/purposeCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "purposeDescription": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "grantId": {
+      "anyOf": [
+        {
+          "$ref": "common.json#/$defs/urnUuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "disclosed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "$ref": "common.json#/$defs/urnUuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "useUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "provenance": {
+            "type": "boolean"
+          },
+          "revealed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidence": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "claims": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "evidence",
+                "claims"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entryId",
+          "version",
+          "useUntil"
+        ]
+      }
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "eventId",
+    "eventType",
+    "timestamp",
+    "participants"
+  ],
+  "$comment": "eventType values: context.created, context.read, context.revised, context.recategorized, context.withdrawn, context.hardDeleted, context.confirmed, context.exported, context.imported, context.expired, context.credentialStatus, grant.issued, grant.revoked, grant.expired, delegation.established, delegation.ended, rule.set, rule.removed, conflict.detected, conflict.resolved, context.restricted, conflict.proposed, directive.set, directive.removed, context.shared (8.1). Left open here so that the event types of a later draft do not fail validation."
+}

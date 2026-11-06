@@ -339,7 +339,8 @@ def redline_units(old_text, new_text, changed_only=False, skip=frozenset()):
         if INCREMENTAL and (a or b)['t'] == 'delta' and not (b and not (a and key(a) == key(b))):
             # an earlier round's Δ note, unchanged or since removed: not shown in an incremental excerpt
             chunks.append((len(secs), False, '')); continue
-        if a:
+        if a and not (a.get('text', '').lstrip('*_').startswith(('This document is a working draft', 'DRAFT')) and b and key(a) == key(b)):
+            # the closing note moves to whichever section ends the document; it does not make that section old
             has_old.add(len(secs))
         if a and b:
             lines, ch = emit_unit(b, 'same' if key(a) == key(b) else 'diff', a)
@@ -393,6 +394,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('base'); ap.add_argument('new'); ap.add_argument('out')
     ap.add_argument('--files'); ap.add_argument('--cover'); ap.add_argument('--renames')
+    ap.add_argument('--renumber', action='store_true', help='the base is a moved base (restructure.py --keep-numbers): renumbering counts as a rename, and the shipped prior clean is compared paragraph for paragraph regardless of order')
     ap.add_argument('--track', action='store_true'); ap.add_argument('--tag', default='v2-draft-2')
     ap.add_argument('--base-docx'); ap.add_argument('--template', default='template/template.docx')
     ap.add_argument('--header', default='Human Context Protocol (HCP) v2  |  Draft Specification (redline)  |  October 2026')
@@ -417,7 +419,16 @@ def main():
             if ln.strip() and not ln.startswith('#'):
                 old, new = ln.rstrip('\n').split('\t')[:2]
                 renames.append((old, new))
+    if o.renumber:
+        import restructure
+        heads = set()
+        for f in (o.files.split(',') if o.files else DEFAULT_FILES):
+            p = os.path.join(o.base, f)
+            if os.path.exists(p):
+                heads |= set(re.findall(r'^#{1,4} (\d+(?:\.\d+)*)\.? ', open(p, encoding='utf-8').read(), re.M))
     def apply_renames(t):
+        if o.renumber:
+            t = restructure.renumber(t, heads)
         for old, new in renames:
             t = re.sub(old[3:], new, t) if old.startswith('re:') else t.replace(old, new)
         return t
@@ -434,7 +445,7 @@ def main():
         if not o.since:
             check(not re.search(r'^Δ ', old, re.M), f'{f}: base carries no Δ notes (rolling redline starts from a clean)')
         ann, secs = redline_units(old, new, o.changed_only)
-        if renames:
+        if renames or o.renumber:
             _, secs_r = redline_units(apply_renames(old), new)
             subst = {s for s, ch, _ in secs_r if ch}
             if o.skip_rename_only:
@@ -475,7 +486,11 @@ def main():
     if not o.changed_only:
       check(acc == cn, f'accept-all view equals the clean build of the new source ({len(acc)} vs {len(cn)} paragraphs){first_diff(acc, cn)}')
       check(rej == co, f'reject-all view equals the clean build of the base ({len(rej)} vs {len(co)} paragraphs){first_diff(rej, co)}')
-    if o.base_docx:
+    if o.base_docx and o.renumber:
+        from collections import Counter
+        shipped = clean_paras(o.base_docx)
+        check(Counter(rej) == Counter(shipped) if not o.changed_only else True, f'reject-all view holds every paragraph of the shipped prior clean, moved ({len(rej)} vs {len(shipped)})')
+    elif o.base_docx:
         check(rej == clean_paras(o.base_docx), 'reject-all view equals the shipped prior clean')
 
     deltas = re.findall(r'^Δ .*$', '\n'.join(new_parts), re.M)
@@ -486,7 +501,7 @@ def main():
     xml = zipfile.ZipFile(clean_new).read('word/document.xml').decode('utf-8')
     check('Δ ' not in xml and not re.search('[' + hcpdoc.MARKS + ']', xml), 'clean build carries no Δ notes or change markers')
     changed = [(f, s, nd, ro) for f, s, ch, nd, ro in report if ch]
-    print(f'changed sections: {len(changed)}' + (f' (rename-only: {sum(1 for c in changed if c[3])})' if renames else ''))
+    print(f'changed sections: {len(changed)}' + (f' (rename-only: {sum(1 for c in changed if c[3])})' if renames or o.renumber else ''))
     for f, s, nd, ro in changed:
         print(f'   {f:15s} {s[:70]:70s} Δ×{nd}{"  rename-only" if ro else ""}')
     print('ALL PASS' if ok else 'FAILURES')

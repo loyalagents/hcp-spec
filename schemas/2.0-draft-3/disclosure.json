@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/disclosure.json",
+  "title": "HCP disclosure",
+  "description": "An entry as disclosed to a Context Client: never the stored entry. Defined in 7.4 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Grant-scoped, opaque, never the entry id."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "$ref": "common.json#/$defs/content"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "common.json#/$defs/evidenceItem"
+          }
+        ],
+        "properties": {
+          "revealed": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "A JSON Pointer into the stored credential (14.9)."
+            }
+          }
+        }
+      }
+    },
+    "assertion": {
+      "$ref": "common.json#/$defs/assertion"
+    },
+    "classification": {
+      "$ref": "common.json#/$defs/classification"
+    },
+    "standing": {
+      "type": "object",
+      "properties": {
+        "assurance": {
+          "$ref": "common.json#/$defs/assurance"
+        },
+        "confirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "assurance",
+        "confirmed"
+      ]
+    },
+    "useUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "common.json#/$defs/relationshipType"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "target"
+        ]
+      }
+    },
+    "onwardSharing": {
+      "const": true,
+      "description": "The client may share from this entry under 3.12 (7.4)."
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "submittedBy": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "operator": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "operator"
+          ]
+        },
+        "source": {
+          "enum": [
+            "conversation",
+            "document",
+            "person-input",
+            "integration"
+          ]
+        },
+        "assertedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "submittedBy",
+        "source",
+        "assertedAt",
+        "recordedAt"
+      ],
+      "description": "Only under a grant with the provenance action; names, never identifiers (7.4.1).",
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "id"
+            ]
+          },
+          {
+            "required": [
+              "confirmedBy"
+            ]
+          },
+          {
+            "required": [
+              "authorizedUnder"
+            ]
+          },
+          {
+            "required": [
+              "submittedByClient"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "ref",
+    "version",
+    "content",
+    "assertion",
+    "classification",
+    "standing",
+    "useUntil"
+  ],
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "id"
+        ]
+      },
+      {
+        "required": [
+          "subject"
+        ]
+      },
+      {
+        "required": [
+          "record"
+        ]
+      },
+      {
+        "required": [
+          "schema"
+        ]
+      }
+    ]
+  },
+  "$comment": "Withheld members (7.4): id, subject, record (status, provenance, conversion, metadata)."
+}

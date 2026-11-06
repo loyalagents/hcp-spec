@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 880 520" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <title>HCP roles in a read (3.13)</title>
+  <desc>Six steps: the Requesting Party gives the HCP Client a task; the client requests a grant from the Authorization Service; the Authorizing Principal approves and the client receives authorization evidence; the client queries the HCP Provider; the provider applies the grant, minimizes, discloses and records the access in the audit log; the client decides what reaches the model.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3b4a5a"/></marker>
+  </defs>
+  <rect width="880" height="520" fill="#ffffff"/>
+  <!-- boxes -->
+  <g stroke="#3b4a5a" stroke-width="1.5" fill="#f4f6f8">
+    <rect x="30" y="40" width="200" height="70" rx="8"/>
+    <rect x="30" y="200" width="250" height="170" rx="8"/>
+    <rect x="390" y="40" width="220" height="90" rx="8"/>
+    <rect x="680" y="40" width="170" height="90" rx="8" fill="#eef3fb"/>
+    <rect x="450" y="250" width="400" height="200" rx="8" fill="#eef6ef"/>
+  </g>
+  <g stroke="#3b4a5a" stroke-width="1.2" fill="#ffffff" stroke-dasharray="5 4">
+    <rect x="55" y="295" width="210" height="55" rx="6"/>
+    <rect x="475" y="375" width="160" height="55" rx="6"/>
+    <rect x="665" y="375" width="160" height="55" rx="6"/>
+  </g>
+  <g fill="#1d2833" font-weight="bold">
+    <text x="130" y="72" text-anchor="middle">Requesting Party</text>
+    <text x="155" y="232" text-anchor="middle">HCP Client</text>
+    <text x="500" y="72" text-anchor="middle">Authorization Service</text>
+    <text x="765" y="72" text-anchor="middle">Authorizing</text>
+    <text x="765" y="90" text-anchor="middle">Principal</text>
+    <text x="650" y="282" text-anchor="middle">HCP Provider</text>
+  </g>
+  <g fill="#4a5866" font-size="12.5">
+    <text x="130" y="92" text-anchor="middle">the person, or a clinician</text>
+    <text x="155" y="252" text-anchor="middle">holds the grant; the security principal</text>
+    <text x="155" y="318" text-anchor="middle">Model</text>
+    <text x="155" y="336" text-anchor="middle">sees only what the client passes</text>
+    <text x="500" y="92" text-anchor="middle">authenticates, shows the request,</text>
+    <text x="500" y="110" text-anchor="middle">records approval, issues the grant</text>
+    <text x="765" y="110" text-anchor="middle">the person, or a delegate</text>
+    <text x="650" y="302" text-anchor="middle">applies the grant and standing rules,</text>
+    <text x="650" y="320" text-anchor="middle">minimizes, discloses</text>
+    <text x="555" y="398" text-anchor="middle">Entries</text>
+    <text x="555" y="416" text-anchor="middle">with provenance</text>
+    <text x="745" y="398" text-anchor="middle">Audit log</text>
+    <text x="745" y="416" text-anchor="middle">every access recorded</text>
+  </g>
+  <!-- arrows -->
+  <g stroke="#3b4a5a" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <path d="M130,110 L130,196"/>
+    <path d="M280,225 C330,180 350,120 386,95"/>
+    <path d="M614,85 L676,85" marker-start="url(#a)"/>
+    <path d="M440,132 C400,170 330,200 284,240"/>
+    <path d="M282,300 L446,320"/>
+    <path d="M446,345 L282,330"/>
+    <path d="M240,262 L240,292" stroke-dasharray="4 3"/>
+  </g>
+  <g fill="#ffffff" stroke="#3b4a5a" stroke-width="1.2">
+    <circle cx="112" cy="155" r="11"/><circle cx="335" cy="155" r="11"/><circle cx="644" cy="70" r="11"/>
+    <circle cx="380" cy="185" r="11"/><circle cx="364" cy="296" r="11"/><circle cx="364" cy="354" r="11"/><circle cx="264" cy="276" r="11"/>
+  </g>
+  <g fill="#1d2833" font-size="12" font-weight="bold" text-anchor="middle">
+    <text x="112" y="159">1</text><text x="335" y="159">2</text><text x="644" y="74">3</text><text x="380" y="189">3</text>
+    <text x="364" y="300">4</text><text x="364" y="358">5</text><text x="264" y="280">6</text>
+  </g>
+  <g fill="#1d2833" font-size="12.5">
+    <text x="30" y="474">1  The Requesting Party gives the HCP Client a task.</text>
+    <text x="30" y="492">2  The client requests a grant.</text>
+    <text x="30" y="510">3  The person approves; the client receives evidence.</text>
+    <text x="450" y="474">4  The client queries the provider, with a purpose.</text>
+    <text x="450" y="492">5  The provider returns only what the grant covers.</text>
+    <text x="450" y="510">6  The client decides what reaches any model.</text>
+  </g>
+</svg>

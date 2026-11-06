@@ -47,12 +47,28 @@ for i in schemas:
 check(not unres, f'every $ref resolves {unres}')
 
 # ---------------------------------------------------------------- examples from the source
+_OLD = None
+if os.path.exists(os.path.join(SRC, 'intro.md')):   # Draft 3 Group 8: examples keyed by their old section numbers
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import restructure
+    _OLD = restructure.old_layout(SRC)
 def blocks():
     for n in range(1, 28):
-        f = f's{n}.md'; lines = open(os.path.join(SRC, f)).read().split('\n'); sec = '?'; i = 0
+        f = f's{n}.md'
+        lines = (_OLD[f] if _OLD else open(os.path.join(SRC, f)).read()).split('\n'); sec = '?'; i = 0
         while i < len(lines):
             m = re.match(r'^#+ (\d[\d.]*)', lines[i])
             if m: sec = m.group(1)
+            if re.match(r'^    (HTTP/1\.1 \d{3}|(GET|POST|PUT|DELETE|PATCH) /\S* HTTP/1\.1)', lines[i]):
+                # an HTTP message (Group 8c, RS9): the JSON body follows the first blank line
+                b = []
+                while i < len(lines) and (lines[i].startswith('    ') or not lines[i].strip()) and not (b and re.match(r'^    (HTTP/1\.1 \d{3}|(GET|POST|PUT|DELETE|PATCH) /)', lines[i])):
+                    b.append(lines[i][4:] if lines[i].startswith('    ') else ''); i += 1
+                body = '\n'.join(b).split('\n\n', 1)
+                if len(body) == 2 and body[1].strip().startswith('{'):
+                    try: yield f, sec, json.loads(body[1].strip())
+                    except ValueError: pass
+                continue
             if lines[i].startswith('    {') and not lines[i - 1].startswith('    '):
                 b = []
                 while i < len(lines) and (lines[i].startswith('    ') or not lines[i].strip()):
@@ -141,7 +157,7 @@ def compare(tmpl, s, base, path, partial=False):
         alts = [a.strip().strip('{}') for a in tmpl.strip('{}').split(' | ')]
         if E is not None:
             for a in alts:
-                if a not in [str(e) for e in E] and not a.startswith(('URI', 'ISO', 'null')) and a != 'null':
+                if a not in [str(e) for e in E] and not a.startswith(('URI', 'ISO', 'date-time', 'null')) and a != 'null':
                     findings.append(f'{path}: "{a}" is not a value the schema allows {E}')
 
 def validate(name, inst, label):
@@ -165,14 +181,14 @@ template('standing-rule', ex('6.3'), '6.3 standing rule')
 template('disclosure', ex('7.4'), '7.4 disclosure')
 template('audit-event', ex('8.2'), '8.2 audit event')
 validate('operations/query-request', ex('9.4.1', 0), '9.4.1 query request')
-template('operations/query-result', ex('9.4.1', 1), '9.4.1 query result')
-template('operations/get-entry-result', ex('9.4.2'), '9.4.2 get entry result')
+(template if is_template(ex('9.4.1', 1)) else validate)('operations/query-result', ex('9.4.1', 1), '9.4.1 query result')
+(template if is_template(ex('9.4.2')) else validate)('operations/get-entry-result', ex('9.4.2'), '9.4.2 get entry result')
 validate('disclosure', ex('9.4.2')['entry'], '9.4.2 disclosed entry')
 validate('operations/revise-request', ex('9.4.4'), '9.4.4 revise request')
-template('operations/withdraw-result', ex('9.4.5'), '9.4.5 withdraw result')
+(template if is_template(ex('9.4.5')) else validate)('operations/withdraw-result', ex('9.4.5'), '9.4.5 withdraw result')
 imp = ex('9.4.11', 0)
 (template if imp.get('export') == {} else validate)('operations/import-request', imp, '9.4.11 import request')
-template('operations/import-result', ex('9.4.11', 1), '9.4.11 import result')
+(template if is_template(ex('9.4.11', 1)) else validate)('operations/import-result', ex('9.4.11', 1), '9.4.11 import result')
 validate('error', ex('10.4')['structuredContent'], '10.4 MCP error')
 for sec, label in [('11.4', '11.4 General Context entry'), ('14.4', '14.4 VC Evidence entry'), ('22.2', '22.2 education entry')]:
     e = ex(sec)
@@ -192,7 +208,14 @@ if sid('export') in schemas:
     n0 = len(findings); compare(ex('4.2.5f')['basis'], {'$ref': sid('common') + '#/$defs/basis'}, BASE, '4.2.5 basis')
     compare(ex('7.4.1f')['provenance'], {'$ref': sid('disclosure') + '#/properties/provenance'}, BASE, '7.4.1 provenance')
     check(len(findings) == n0, '4.2.5 basis and 7.4.1 provenance (fragments) match their schemas')
+if '6.4' in EX and sid('directive') in schemas:
+    template('directive', ex('6.4'), '6.4 directive')
+if '4.7.4f' in EX:
+    n0 = len(findings); compare(ex('4.7.4f')['proposal'], {'$ref': sid('entry') + '#/properties/record/properties/relationships/items/properties/proposal'}, BASE, '4.7.4 proposal')
+    check(len(findings) == n0, '4.7.4 proposal (fragment) matches its schema')
 template('discovery', ex('19.2'), '19.2 discovery')
+if '9.4.16' in EX and sid('operations/report-sharing-request') in schemas:
+    (template if is_template(ex('9.4.16')) else validate)('operations/report-sharing-request', ex('9.4.16'), '9.4.16 report onward sharing request')
 
 # cross-member rules (14.2)
 for sec in ('11.4', '14.4', '22.2'):
@@ -203,7 +226,7 @@ for sec in ('11.4', '14.4', '22.2'):
         check(it['role'] == 'content' and cs.get('id') == e['subject']['id'], f'{sec}: content.evidence names the content item; credentialSubject.id = subject.id')
 
 # MCP tools (10.3)
-for sec in ('10.3.1', '10.3.2', '10.3.3', '10.3.4', '10.3.5'):
+for sec in ('10.3.1', '10.3.2', '10.3.3', '10.3.4', '10.3.5') + (('10.3.6',) if '10.3.6' in EX else ()):
     t = ex(sec)
     try: Draft202012Validator.check_schema(t['inputSchema']); ok = True
     except Exception as e: ok = False

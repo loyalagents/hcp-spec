@@ -11,7 +11,7 @@ Redline additions (produced by redline.py, never written by hand):
   INS_ON .. INS_OFF   inserted text        DEL_ON .. DEL_OFF   deleted text
   'Δ ...' lines       change notes; dropped in clean mode, rendered as note paragraphs in redline mode
 """
-import re, zipfile, html
+import os, re, zipfile, html
 
 INS_ON, INS_OFF, DEL_ON, DEL_OFF = '\x0e', '\x0f', '\x10', '\x11'
 MARKS = INS_ON + INS_OFF + DEL_ON + DEL_OFF
@@ -19,8 +19,8 @@ _MARK_RE = re.compile('([' + MARKS + '])')
 
 # Redline styling. Colour is replaced, not added, so a run never carries two <w:color> elements.
 INS_COLOR, DEL_COLOR = '1155CC', 'C00000'
-TRACK_AUTHOR = 'HCP v2 Draft 2'
-TRACK_DATE = '2026-10-26T00:00:00Z'
+TRACK_AUTHOR = os.environ.get('HCP_TRACK_AUTHOR', 'HCP v2 Draft 2')
+TRACK_DATE = os.environ.get('HCP_TRACK_DATE', '2026-10-26T00:00:00Z')
 
 RPR_ORDER = ['rStyle', 'rFonts', 'b', 'bCs', 'i', 'iCs', 'caps', 'smallCaps', 'strike', 'dstrike', 'outline',
              'shadow', 'emboss', 'imprint', 'noProof', 'snapToGrid', 'vanish', 'webHidden', 'color', 'spacing',
@@ -189,6 +189,7 @@ class Renderer:
                  + ''.join(f'<w:{s} w:color="b8c8dc" w:space="0" w:sz="4" w:val="single"/>' for s in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'))
                  + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblLook w:val="0000"/></w:tblPr>')
         out = [f'<w:tbl>{tblpr}<w:tblGrid>{grid}</w:tblGrid>']
+        row_tags = []
         for i, r in enumerate(rows):
             self.cell_stats = []
             cells = ''.join(self.cell(c, widths[j], i == 0) for j, c in enumerate(r))
@@ -199,9 +200,16 @@ class Renderer:
                 self.rev_id += 1
                 tag = 'w:ins' if 'ins' in nonempty[0] else 'w:del'
                 mark = f'<{tag} w:id="{self.rev_id}" w:author="{TRACK_AUTHOR}" w:date="{TRACK_DATE}"/>'
+            row_tags.append(tag if mark else None)
             out.append(f'<w:tr><w:trPr><w:cantSplit/>{hdr}{mark}</w:trPr>' + cells + '</w:tr>')
         out.append('</w:tbl>')
-        out.append('<w:p><w:pPr><w:spacing w:after="60" w:before="60" w:lineRule="auto"/></w:pPr></w:p>')
+        # the spacer after a wholly inserted or deleted table belongs to the change, so that
+        # rejecting (or accepting) it leaves no stray paragraph behind
+        spacer_mark = ''
+        if self.track and row_tags and row_tags[0] and all(t == row_tags[0] for t in row_tags):
+            self.rev_id += 1
+            spacer_mark = f'<w:rPr><{row_tags[0]} w:id="{self.rev_id}" w:author="{TRACK_AUTHOR}" w:date="{TRACK_DATE}"/></w:rPr>'
+        out.append(f'<w:p><w:pPr><w:spacing w:after="60" w:before="60" w:lineRule="auto"/>{spacer_mark}</w:pPr></w:p>')
         return ''.join(out)
 
     def delta_note(self, text):

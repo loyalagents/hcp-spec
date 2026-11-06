@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 470" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <title>Where HCP sits (I4)</title>
+  <desc>Six layers from the person outward: identity and wallets; credentials; personal context, which is HCP; agent memory; agent protocols; fiduciary governance. Each layer lists examples and how it meets HCP.</desc>
+  <rect width="880" height="470" fill="#ffffff"/>
+  <g stroke="#3b4a5a" stroke-width="1.4">
+    <rect x="30" y="30" width="820" height="60" rx="6" fill="#f4f6f8"/>
+    <rect x="30" y="100" width="820" height="60" rx="6" fill="#f4f6f8"/>
+    <rect x="30" y="170" width="820" height="60" rx="6" fill="#dcebdd" stroke-width="2.4"/>
+    <rect x="30" y="240" width="820" height="60" rx="6" fill="#f4f6f8"/>
+    <rect x="30" y="310" width="820" height="60" rx="6" fill="#f4f6f8"/>
+    <rect x="30" y="380" width="820" height="60" rx="6" fill="#f4f6f8"/>
+  </g>
+  <g fill="#1d2833" font-weight="bold">
+    <text x="50" y="57">Fiduciary governance</text>
+    <text x="50" y="127">Agent protocols</text>
+    <text x="50" y="197">Personal context: HCP</text>
+    <text x="50" y="267">Agent memory</text>
+    <text x="50" y="337">Credentials</text>
+    <text x="50" y="407">Identity and wallets</text>
+  </g>
+  <g fill="#4a5866" font-size="12.5">
+    <text x="50" y="76">Duties of care and loyalty on the organization behind an agent</text>
+    <text x="50" y="146">How agents reach tools, other agents and companies</text>
+    <text x="50" y="216">Selected context exchanged with permissions, provenance and audit</text>
+    <text x="50" y="286">What an assistant remembers, and formats for moving it</text>
+    <text x="50" y="356">Claims an institution signs, verifiable by anyone</text>
+    <text x="50" y="426">Who the person and each organization are; where keys are kept</text>
+  </g>
+  <g fill="#1d2833" font-size="12.5">
+    <text x="520" y="57">Embedded Fiduciary Governance (GliaNet)</text>
+    <text x="520" y="76" fill="#4a5866">attaches at the Client Operator (3.2.8)</text>
+    <text x="520" y="127">MCP, A2A, Personal Agent Protocol</text>
+    <text x="520" y="146" fill="#4a5866">HCP is carried over MCP (10)</text>
+    <text x="520" y="197" font-weight="bold">Entries, grants, disclosure, rules,</text>
+    <text x="520" y="216" font-weight="bold">audit, discovery</text>
+    <text x="520" y="267">Open Memory Protocol, Portable Memory</text>
+    <text x="520" y="286" fill="#4a5866">draws on HCP and writes back (I11)</text>
+    <text x="520" y="337">W3C Verifiable Credentials, Open Badges</text>
+    <text x="520" y="356" fill="#4a5866">held whole as evidence (14)</text>
+    <text x="520" y="407">Decentralized Identifiers, digital wallets</text>
+    <text x="520" y="426" fill="#4a5866">identify the person (3.2.9) and hold credentials (14.3)</text>
+  </g>
+  <text x="440" y="462" text-anchor="middle" fill="#4a5866" font-size="12">From the person (bottom) to the organizations that act for them (top)</text>
+</svg>

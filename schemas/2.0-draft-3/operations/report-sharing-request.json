@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/operations/report-sharing-request.json",
+  "title": "Report onward sharing request",
+  "description": "Report onward sharing request. Defined in 5.2.8, 9.4.16 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "recipient": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "domain",
+        "name"
+      ]
+    },
+    "refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "purpose": {
+      "$ref": "../common.json#/$defs/purposeCode"
+    },
+    "sharedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "recipient",
+    "refs",
+    "purpose",
+    "sharedAt"
+  ],
+  "$comment": "Result: none (204 over HTTP)."
+}

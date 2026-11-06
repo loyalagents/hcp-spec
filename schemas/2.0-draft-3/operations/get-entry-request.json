@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/operations/get-entry-request.json",
+  "title": "Get entry request",
+  "description": "Get entry request. Defined in 5.2.2 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string"
+    },
+    "entryId": {
+      "$ref": "../common.json#/$defs/urnUuid"
+    },
+    "purpose": {
+      "$ref": "../common.json#/$defs/purposeCode"
+    },
+    "purposeDescription": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "purpose"
+  ],
+  "$comment": "The HTTP Binding carries ref or entryId in the path (9.4.2); the MCP tool carries ref (10.3.2)."
+}

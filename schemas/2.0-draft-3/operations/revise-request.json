@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hcp.example/schemas/2.0-draft-3/operations/revise-request.json",
+  "title": "Revise request",
+  "description": "Revise request. Defined in 5.2.4, 9.4.4 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string"
+    },
+    "entryId": {
+      "$ref": "../common.json#/$defs/urnUuid"
+    },
+    "expectedVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "$ref": "../common.json#/$defs/content"
+    },
+    "evidence": {
+      "$ref": "../common.json#/$defs/evidence"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assertion": {
+      "type": "object",
+      "properties": {
+        "declarationType": {
+          "$ref": "../common.json#/$defs/declarationType"
+        },
+        "confidence": {
+          "$ref": "../common.json#/$defs/confidence"
+        },
+        "validUntil": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "assertedBy": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "assertedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "../common.json#/$defs/relationshipType"
+              },
+              "target": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "target"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "expectedVersion",
+    "content",
+    "reason"
+  ],
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "subject"
+        ]
+      },
+      {
+        "required": [
+          "classification"
+        ]
+      }
+    ]
+  },
+  "$comment": "A revision does not change subject or classification (5.2.4). The HTTP Binding names the entry in the path (9.4.4)."
+}
