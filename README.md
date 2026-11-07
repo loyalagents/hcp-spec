@@ -19,6 +19,18 @@ Editor: Beth Porter, Loyal Agents initiative.
 
 The Word documents for each draft are attached to its release.
 
+## Implementation repositories
+
+Projects implementing or exploring HCP. Each repository documents its own scope
+and compatibility.
+
+| Repository | Description |
+|------------|-------------|
+| [Context Router](https://github.com/loyalagents/context-router) | Local-first personal memory application. See its [HCP integration notes](https://github.com/loyalagents/context-router/blob/main/docs/useful/HCP_INTEGRATION.md). |
+
+To add a project, link its repository, briefly describe its purpose, and include
+implementation documentation when available.
+
 ## The schemas
 
 Section numbers below are Draft 3's. Draft 2's schemas, in `schemas/2.0-draft-2/`, follow Draft 2's numbering (its 25.2 is Draft 3's A.2).
