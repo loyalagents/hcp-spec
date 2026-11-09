@@ -66,6 +66,14 @@ and compatibility.
 To add a project, link its repository, briefly describe its purpose, and include
 implementation documentation when available.
 
+### Adoption guidance
+
+[OAuth and browser integration lessons](docs/adoption/oauth-browser-integration.md)
+collects non-normative findings from a bounded, synthetic implementation: binding
+OAuth processing to HCP grants, qualifying library defaults, isolating cookies,
+and testing consent and TLS in real browsers. It identifies the tested revisions
+and remaining limits; it does not change the draft or certify conformance.
+
 ## The schemas
 
 Section numbers below are Draft 3's. Draft 2's schemas, in `schemas/2.0-draft-2/`, follow Draft 2's numbering (its 25.2 is Draft 3's A.2).
