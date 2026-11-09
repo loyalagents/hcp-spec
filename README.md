@@ -19,6 +19,13 @@ Editor: Beth Porter, Loyal Agents initiative.
 
 The Word documents for each draft are attached to its release.
 
+## Design investigations
+
+- [Encryption design review and investigation](docs/design/encryption-review.md):
+  Draft 3's storage guarantees, E2E delivery and trust-boundary gaps, related
+  lifecycle issues, and the decisions and validation needed for a revision.
+  This is a non-normative investigation; proposed changes are not adopted requirements.
+
 ## Implementation repositories
 
 Projects implementing or exploring HCP. Each repository documents its own scope
