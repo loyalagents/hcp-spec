@@ -54,6 +54,13 @@ Technical follow-ups are tracked separately in [E2E confidentiality and delivery
 
 The source files are the editing inputs for both the reading pages and Word builds. See the artifact table above for available downloads.
 
+## Design investigations
+
+- [Encryption design review and investigation](docs/design/encryption-review.md):
+  Draft 3's storage guarantees, E2E delivery and trust-boundary gaps, related
+  lifecycle issues, and the decisions and validation needed for a revision.
+  This is a non-normative investigation; proposed changes are not adopted requirements.
+
 ## Implementation repositories
 
 Projects implementing or exploring HCP. Each repository documents its own scope
