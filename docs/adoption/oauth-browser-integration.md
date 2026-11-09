@@ -159,4 +159,3 @@ local discovery/trust or another assistant host's responsibilities.
 [cr-ci]: https://github.com/loyalagents/context-router/actions/runs/42585776971
 [cr-qualification]: https://github.com/loyalagents/context-router/actions/runs/42585776883
 [cr-record]: https://github.com/loyalagents/context-router/blob/71d8433215009e4f2430ac6631a1f5392fb4c7ab/docs/plans/active/hcp-alignment/README.md#c2-implementation-checkpoint-2026-11-09
-
