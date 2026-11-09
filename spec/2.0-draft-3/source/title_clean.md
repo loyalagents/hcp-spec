@@ -2,8 +2,8 @@
 
 **Version:** 2.0-draft-3
 
-**Status:** Working draft for partner review --- November 2026; subject to change
+**Status:** Working draft for review --- November 2026
 
 **Editor:** Beth Porter, Loyal Agents initiative
 
-*DRAFT --- Working draft for partner review; subject to change*
+*DRAFT --- Not for distribution*

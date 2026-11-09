@@ -127,4 +127,4 @@ A v1 → v2 section map, recording where each v1 section went and listing every 
 
 *This document is a working draft developed under the Loyal Agents initiative, a joint venture of Stanford University and Consumer Reports. It has not been formally reviewed or endorsed by Stanford University, Consumer Reports, or any convening partner.*
 
-*DRAFT --- Working draft for partner review; subject to change*
+*DRAFT --- Not for distribution*
