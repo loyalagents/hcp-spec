@@ -23,7 +23,7 @@ We particularly welcome feedback on:
 - A concrete use case that the roles, grants, or profiles cannot express clearly.
 - Where consent, disclosure, revocation, or downstream client obligations are ambiguous.
 - Where two independent implementations could reasonably interpret a requirement differently.
-- Which unresolved encryption or lifecycle questions would prevent a useful pilot.
+- Which missing examples or unclear requirements would prevent a useful pilot.
 
 [Open a specification feedback issue](https://github.com/loyalagents/hcp-spec/issues/new?template=spec-feedback.md). Include the draft and commit, section numbers, a synthetic example, and the ambiguity or change you want considered. Questions and reports of missing behavior are welcome without a proposed solution. See [CONTRIBUTING.md](CONTRIBUTING.md) for focused corrections and design proposals.
 
@@ -39,7 +39,7 @@ We particularly welcome feedback on:
 | Implementations | Projects are listed below with their own compatibility notes. This repository does not designate a validated Draft 3 reference implementation. |
 | Behavioral conformance suite | Planned in [section 20](spec/2.0-draft-3/specification.md#20-conformance-testing); not yet published here or linked as an available suite. |
 
-Draft 3's E2E delivery and trust boundaries, and the interaction between hard deletion and response replay, remain under investigation. [PR #18](https://github.com/loyalagents/hcp-spec/pull/18) records the review findings and candidate remedies; they are not adopted protocol changes. The [roadmap](spec/2.0-draft-3/path-to-v2-final.md#p11-before-v2-is-final) summarizes the questions for reviewers.
+Technical follow-ups are tracked separately in [E2E confidentiality and delivery (#22)](https://github.com/loyalagents/hcp-spec/issues/22) and [hard deletion and replay (#23)](https://github.com/loyalagents/hcp-spec/issues/23), building on [the existing investigation (#18)](https://github.com/loyalagents/hcp-spec/pull/18). These are open questions, not adopted protocol changes.
 
 ## What is here
 

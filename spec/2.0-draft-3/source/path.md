@@ -10,7 +10,7 @@ This page says what remains open before v2 is final (P1), what changed from v1 (
 
 This section is written for all audiences, not only implementers. Pilot partners, policymakers, and anyone deciding whether HCP fits their use case need to know what remains open without reading the protocol sections. It is plain language, not requirements language. Each item below names where in this specification it will land, so that the roadmap points at a Part rather than a gap.
 
-Draft 4 is intended to take in comments on Draft 3, the findings of the HCP Development and Testing working group, Richard Whitt's (GliaNet) analysis of the fiduciary layer, and Turn.io's conformance work. None had arrived when Draft 3 was assembled; this is a list of expected inputs, not a statement that those artifacts are available or that contributors have committed to a release date.
+Draft 4 will take in comments on Draft 3, the findings of the HCP Development and Testing working group, Richard Whitt's (GliaNet) analysis of the fiduciary layer, and Turn.io's conformance suite. None had arrived when Draft 3 was assembled.
 
 ## P1.1 Before v2 Is Final
 
@@ -19,11 +19,8 @@ Draft 4 is intended to take in comments on Draft 3, the findings of the HCP Deve
 | Item | What remains open | Home |
 |--------------------------------|------------------------------------------------------------------|------------|
 | Permanent namespace | The placeholder hcp.example is replaced by a permanent namespace. The maintainers hope to secure hcp.me. | 1.7, Appendix A |
-| E2E confidentiality and trust boundaries | Decide what `e2e` guarantees during processing and delivery; trace how authorized clients receive plaintext without exposing it to provider-operated components. Address recipient authentication, the active-provider threat model, and content-bearing metadata. | 4.8, 9, 10, 19, 21; G1.4 |
-| Hard deletion and response replay | Resolve the interaction between unrecoverable hard deletion and the requirement to retain and replay original write responses. The intended retry outcome and treatment of retained response content need an explicit decision. | 5.4.2, 9.6 |
-| Implementation and validation evidence | Publish the behavioral suite and document what has been exercised against specific drafts, bindings, and claims. Schema/example checks alone do not demonstrate interoperability or security guarantees. | 18, 20; G1 |
 
-The encryption and lifecycle rows summarize open findings in [the encryption design investigation (PR #18)](https://github.com/loyalagents/hcp-spec/pull/18). The review and its candidate remedies are non-normative; this roadmap does not adopt a new transport, cryptographic suite, or retry rule. These questions are part of the current partner review, rather than completed guarantees. Further findings may add work before a final release.
+This table is not a complete readiness checklist. Open technical questions include [E2E confidentiality and delivery (#22)](https://github.com/loyalagents/hcp-spec/issues/22) and [hard deletion and replay (#23)](https://github.com/loyalagents/hcp-spec/issues/23). Their remedies and implications for a final release remain subject to review.
 
 ## P1.2 Done in Draft 2
 
@@ -35,7 +32,7 @@ Every item planned for Draft 2 was done in Draft 2 (P3).
 
 Δ CHANGED (v2-draft-3) --- Provenance on request is done (7.4.1) and leaves the table (K5). Conflict reconciliation is done as far as evidence allows (4.7, 4.7.4); automated resolution and a dimension vocabulary move to P1.4 (M1, M6). End-to-end encrypted storage is done (4.8); audit volume moves to P1.4 (ST1, AU1). The Security and Privacy row adds verification on the person's side (Q24). Security and Privacy Considerations are written (21) and leave the table (SP1). Deployment patterns (G5) and the overview, roles, use cases and comparison (1.9--1.12) are written and leave the table (L11--L14). Renamed from "Planned for Draft 3".
 
-Draft 3 includes the planned sections and features summarized in P3. Their inclusion does not establish that every design question is resolved or every behavior has been validated. P1.1 records the current issues to resolve before final; P1.4 records later work.
+Draft 3 includes the planned sections and features summarized in P3. Inclusion is not evidence that every design question is resolved or every behavior validated; see the open questions linked in P1.1 and later work in P1.4.
 
 ## P1.4 Later
 
@@ -74,7 +71,7 @@ v1 §7.12, specification architecture and the actor model, is resolved by this d
 
 **Credential format.** v1 permitted two securing mechanisms as a deliberate deferral (14.5). The wider identity ecosystem has moved toward selective-disclosure formats --- the EU Digital Identity wallet toward SD-JWT VC, ISO mDL toward mdoc --- in part because of the complexity of RDF canonicalization. Turn.io proposed profiling v1's Tier 2 on SD-JWT VC outright. That was not adopted, because SD-JWT VC is a distinct credential data model rather than a proof format, and adopting it would break the common envelope and the Open Badges alignment; permitting VC-JOSE-COSE obtains the canonicalization-free path and selective disclosure without either consequence. Draft 2 makes `eddsa-rdfc-2022` mandatory to verify, because it is what Open Badges verifiers already support, and keeps the others as options (14.5). Pilot evidence on which mechanisms were issued and verified, whether selective disclosure was exercised (14.9), and wallet and verifier support will inform whether v2 adds a second mandatory mechanism.
 
-**End-to-end encrypted storage.** Relevance ordering (7.3), conflict detection (15), and server-side checks on content (5.2.3) need access to entry content. Draft 3 assigns those steps to the Context Subject's trust domain under the `storage_encryption` declaration `e2e`, while the provider stores ciphertext (4.8). That assignment does not by itself specify confidential delivery to the authorized client or resolve the trust and lifecycle questions in P1.1. The deployment guidance describes the intended arrangement; it is not evidence of a validated E2E implementation. Pilot evidence should also record how often the subject's component is unreachable (G1.2).
+**End-to-end encrypted storage.** Relevance ordering (7.3), conflict detection (15), and server-side checks on content (5.2.3) assume the provider can read entry content. Draft 3 describes an interface arrangement: under the `storage_encryption` declaration `e2e`, those steps are performed within the Context Subject's trust domain, and the provider stores ciphertext (4.8). This arrangement remains under technical review (P1.1). Pilot evidence on how often that domain is unreachable will show whether the design holds (G1.2).
 
 **Federation.** Learning Economy Foundation reviewers pointed to wallet-attached storage, which lets a person hold and share artifacts through a storage provider of their choosing. Whether an HCP instance can be one such store, or whether the two compose some other way, is an input to the federation design.
 
