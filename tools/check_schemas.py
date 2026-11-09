@@ -1,4 +1,7 @@
-"""Check the HCP JSON Schemas against every JSON example in the specification source.
+"""Validate the HCP JSON Schemas and the selected source examples enumerated below.
+
+Example coverage is not exhaustive. These checks do not exercise a running
+implementation or establish behavioral conformance.
 
 Usage: python3 -I tools/check_schemas.py SCHEMA_DIR SOURCE_DIR
 

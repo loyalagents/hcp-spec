@@ -30,6 +30,8 @@ An AI assistant is more useful when it knows something about the person it is he
 
 **How applications connect.** An application asks the person for access to some kinds of context, for purposes it states, and usually for a limited time. The person approves on a screen, in a chat or by voice (G4). The application then asks the provider for what it needs, over the web (9) or through the Model Context Protocol that AI assistants use (10), and receives only what the person's approval covers. Every access is recorded in a log the person can read, and the person can withdraw access at any time.
 
+**What the log can show.** HCP records accesses and disclosures through the provider. The provider cannot observe every subsequent use of a disclosed copy. Purpose limits, use-until, onward sharing and directives remain obligations of the receiving client and its operator (21.1); a grant's revocation does not itself recall plaintext already received.
+
 HCP is built from six building blocks.
 
 | Building block | What it is | Where |
@@ -191,14 +193,14 @@ Alignment on shared standards, and on the vocabulary questions deferred to a lat
 | Agent2Agent (A2A) | Linux Foundation; 1.0 | Letting agents from different vendors find each other and hand over tasks |
 | Solid | W3C Solid Community Group, Protocol 0.11; the Linked Web Storage Working Group | Personal data stores, under the person's access control, on web standards |
 
-HCP's goal is different from each: to let a person decide which applications and agents may use their context, for what, and for how long, and to see each use.
+HCP focuses on letting a person decide which applications and agents may receive their context, for what purposes and duration, and see the provider's record of HCP accesses and disclosures. Client behavior after disclosure remains subject to the limits described in 21.1.
 
 **Personal Agent Protocol.** Both serve a person through an agent, and both use OAuth for the person's approval. They differ in these ways:
 
 - **What moves.** The Personal Agent Protocol moves the agent's requests and actions with a company: a return, a booking, an account change. HCP moves context about the person.
 - **Where the data is.** The Personal Agent Protocol holds nothing about the person; the company keeps its account data, and the agent's identifiers for the person are pseudonymous. HCP holds the person's context with a provider they choose.
 - **What the person approves.** Under the Personal Agent Protocol, scopes on an account at one company. Under HCP, categories of their own context, for stated purposes and a stated time (6.1).
-- **Record.** The Personal Agent Protocol ties a person's activity together across a company's channels. HCP keeps a log, which the person reads, of every use of their context (8).
+- **Record.** The Personal Agent Protocol ties a person's activity together across a company's channels. HCP keeps a log, which the person reads, of HCP accesses and disclosures (8).
 
 The two fit together: a personal agent draws on HCP for what it needs to know about the person, and acts with companies over the Personal Agent Protocol. Where the person allowed it when approving the agent's grant, the agent can tell a company what a task needs from Low-sensitivity context, such as a clothing size, and reports each time it does (3.12). A company that needs more obtains its own grant.
 
@@ -220,11 +222,11 @@ HCP's MCP Binding carries context operations as MCP tools (10).
 
 **Agent2Agent (A2A).** A2A lets agents built by different vendors discover each other, hand over tasks and exchange the results. Both connect agents to things outside themselves, and both use OAuth. They differ in these ways:
 
-- **Who is served.** A2A serves the agents and the organizations that run them. HCP serves the person the context is about.
+- **Scope.** A2A coordinates work between agents. HCP defines person-governed access to the context those agents may need.
 - **What moves.** A2A moves tasks, messages and their results. HCP moves entries about a person, each with who asserted it and on what evidence.
-- **Who approves.** In A2A, the agents' operators agree to work together. In HCP, the person approves each grant (6.1).
+- **Context approval.** HCP grants record the person's approval of context categories, purposes and duration (6.1). An A2A task exchange does not itself constitute that HCP grant.
 - **Context passed along.** A2A can carry anything one agent sends another. Under HCP, an agent may tell another organization's agent only what a task needs from Low-sensitivity context, and only where the person allowed it; otherwise the receiving agent obtains its own grant from the person (3.12).
-- **Record.** A2A tracks the state of a task. HCP keeps a log the person can read of every use of their context (8).
+- **Record.** A2A tracks the state of a task. HCP keeps a log the person can read of HCP accesses and disclosures (8).
 
 The two can be used together: an agent that receives a task over A2A, and needs the person's context to do it, asks for a grant under HCP.
 
@@ -232,7 +234,7 @@ The two can be used together: an agent that receives a task over A2A, and needs 
 
 - **What is stored.** Solid stores any kind of data. HCP specifies one kind, context for AI, with an entry model that labels inferences and records provenance (4).
 - **What is granted.** Solid controls access to resources in the store. HCP grants reach categories of context, for stated purposes and until a stated time (6.1).
-- **Record.** HCP requires a log the person can read of every use (8).
+- **Record.** HCP requires a log the person can read of HCP accesses and disclosures (8).
 
 An HCP Provider could keep its entries in a Solid store.
 

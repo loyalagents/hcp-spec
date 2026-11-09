@@ -4,7 +4,42 @@ The Human Context Protocol is an open, person-governed standard for representing
 
 **Status.** HCP v2 is a working draft for review. The current draft is **2.0-draft-3** (November 2026). It is not stable: later drafts change the wire format. Do not build production systems against it without following the drafts.
 
+This repository is currently private for invited partner review. Public release is a separate decision. Record both the draft identifier and the Git commit when reviewing or experimenting: corrections can land within a draft before the next numbered draft.
+
 Editor: Beth Porter, Loyal Agents initiative.
+
+This working draft has not been formally reviewed or endorsed by Stanford University, Consumer Reports, or any convening partner. Named examples and acknowledgments describe inputs to the draft, not implementation certification or institutional endorsement.
+
+## Reviewing HCP?
+
+| Your goal | Start here |
+|-----------|------------|
+| Understand the proposal | [HCP in brief](spec/2.0-draft-3/introduction.md#i3-hcp-in-brief), [worked use cases](spec/2.0-draft-3/introduction.md#i5-worked-use-cases), then [open questions](spec/2.0-draft-3/path-to-v2-final.md#p11-before-v2-is-final) |
+| Assess an integration | [Audience guide](spec/2.0-draft-3/introduction.md#i8-intended-audiences), [Core, bindings and profiles](spec/2.0-draft-3/specification.md#11-parts), then [pilot guidance](spec/2.0-draft-3/guides.md#g1-pilot-onboarding) and the artifact status below |
+| Review a design or propose a correction | [Roadmap](spec/2.0-draft-3/path-to-v2-final.md#p1-roadmap), [security and privacy limits](spec/2.0-draft-3/specification.md#21-security-and-privacy-considerations), and [contribution guidance](CONTRIBUTING.md) |
+
+We particularly welcome feedback on:
+
+- A concrete use case that the roles, grants, or profiles cannot express clearly.
+- Where consent, disclosure, revocation, or downstream client obligations are ambiguous.
+- Where two independent implementations could reasonably interpret a requirement differently.
+- Which missing examples or unclear requirements would prevent a useful pilot.
+
+[Open a specification feedback issue](https://github.com/loyalagents/hcp-spec/issues/new?template=spec-feedback.md). Include the draft and commit, section numbers, a synthetic example, and the ambiguity or change you want considered. Questions and reports of missing behavior are welcome without a proposed solution. See [CONTRIBUTING.md](CONTRIBUTING.md) for focused corrections and design proposals.
+
+## Drafts and available artifacts
+
+| Artifact | Current status |
+|----------|----------------|
+| Draft 3 reading pages and schemas | Available in this repository; an unreleased working revision. Use a commit-specific link for a reproducible review. |
+| Draft 3 Word document | Buildable from source with `make docx`; no Draft 3 GitHub release or downloadable release document has been published yet. |
+| Draft 2 release | [Historical review snapshot](https://github.com/loyalagents/hcp-spec/releases/tag/2.0-draft-2), with links to its Word specification, redline, and revision memo. It remains a working draft even though GitHub displays it as the latest release. |
+| Changes and remaining work | [Draft changelog](spec/2.0-draft-3/path-to-v2-final.md#p3-changelog) and [roadmap](spec/2.0-draft-3/path-to-v2-final.md#p1-roadmap). |
+| Schema/example checks | Available through `make check`; their scope is described below. They do not test a running provider or certify conformance. |
+| Implementations | Projects are listed below with their own compatibility notes. This repository does not designate a validated Draft 3 reference implementation. |
+| Behavioral conformance suite | Planned in [section 20](spec/2.0-draft-3/specification.md#20-conformance-testing); not yet published here or linked as an available suite. |
+
+Technical follow-ups are tracked separately in [E2E confidentiality and delivery (#22)](https://github.com/loyalagents/hcp-spec/issues/22) and [hard deletion and replay (#23)](https://github.com/loyalagents/hcp-spec/issues/23), building on [the existing investigation (#18)](https://github.com/loyalagents/hcp-spec/pull/18). These are open questions, not adopted protocol changes.
 
 ## What is here
 
@@ -17,7 +52,7 @@ Editor: Beth Porter, Loyal Agents initiative.
 | `tools/` | The build: the Word document, a redline between two drafts, the schemas, and the schema checks |
 | `template/` | The Word template the build uses (styles only) |
 
-The Word documents for each draft are attached to its release.
+The source files are the editing inputs for both the reading pages and Word builds. See the artifact table above for available downloads.
 
 ## Implementation repositories
 
@@ -55,19 +90,21 @@ Section numbers below are Draft 3's. Draft 2's schemas, in `schemas/2.0-draft-2/
 | `audit-event.json`, `discovery.json` | 8.2, 19 |
 | `common.json` | Shared definitions |
 
-The schema checks validate every JSON example in the specification. Concrete examples, such as the HTTP Binding's in Draft 3, are validated in full; templates with `{placeholders}` are compared member by member.
+The schema checker validates the published schemas and selected examples enumerated in `tools/check_schemas.py`. Selected concrete examples are validated in full; selected templates with `{placeholders}` are compared member by member. Coverage is not exhaustive: some HTTP examples and behavioral requirements are outside these checks. Passing them does not establish implementation conformance.
 
 ## Building and checking
 
 Requires Python 3.10 or later and `jsonschema` (4.18 or later). The tracked-changes round trip also needs LibreOffice.
 
     pip install jsonschema
-    make check     # regenerate the schemas and check them against every JSON example in the specification
+    make check     # regenerate and validate schemas, then check the selected examples
                    # (DRAFT=2.0-draft-2 for Draft 2; the default is the current draft)
     make docx      # build the Word document from the Markdown source
     make pages     # rebuild the four pages from the source (Draft 3 on)
 
 `tools/make_schemas.py` generates the schemas. Change it rather than editing the JSON by hand, then run `make check`.
+
+Edit Draft 3 text in `spec/2.0-draft-3/source/`, then run `make pages` and include the rebuilt pages in the same PR. CI regenerates the current draft's schemas and pages and fails if their tracked outputs differ. These are document and schema consistency checks, not runtime conformance tests.
 
 ## Licences
 

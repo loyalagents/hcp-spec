@@ -12,3 +12,7 @@ jobs:
       - run: make check
       - name: Schemas are generated, not hand-edited
         run: git diff --exit-code schemas/
+      - name: Reading pages match their source
+        run: |
+          make pages
+          git diff --exit-code -- spec/2.0-draft-3/

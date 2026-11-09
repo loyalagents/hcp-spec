@@ -20,6 +20,8 @@ Draft 4 will take in comments on Draft 3, the findings of the HCP Development an
 |--------------------------------|------------------------------------------------------------------|------------|
 | Permanent namespace | The placeholder hcp.example is replaced by a permanent namespace. The maintainers hope to secure hcp.me. | 1.7, Appendix A |
 
+This table is not a complete readiness checklist. Open technical questions include [E2E confidentiality and delivery (#22)](https://github.com/loyalagents/hcp-spec/issues/22) and [hard deletion and replay (#23)](https://github.com/loyalagents/hcp-spec/issues/23). Their remedies and implications for a final release remain subject to review.
+
 ## P1.2 Done in Draft 2
 
 Δ CHANGED (v2-draft-3) --- Renamed from "Planned for Draft 2".
@@ -30,7 +32,7 @@ Every item planned for Draft 2 was done in Draft 2 (P3).
 
 Δ CHANGED (v2-draft-3) --- Provenance on request is done (7.4.1) and leaves the table (K5). Conflict reconciliation is done as far as evidence allows (4.7, 4.7.4); automated resolution and a dimension vocabulary move to P1.4 (M1, M6). End-to-end encrypted storage is done (4.8); audit volume moves to P1.4 (ST1, AU1). The Security and Privacy row adds verification on the person's side (Q24). Security and Privacy Considerations are written (21) and leave the table (SP1). Deployment patterns (G5) and the overview, roles, use cases and comparison (1.9--1.12) are written and leave the table (L11--L14). Renamed from "Planned for Draft 3".
 
-Every item planned for Draft 3 is done in this draft (P3). What remains open is in P1.4.
+Draft 3 includes the planned sections and features summarized in P3. Inclusion is not evidence that every design question is resolved or every behavior validated; see the open questions linked in P1.1 and later work in P1.4.
 
 ## P1.4 Later
 
@@ -69,7 +71,7 @@ v1 §7.12, specification architecture and the actor model, is resolved by this d
 
 **Credential format.** v1 permitted two securing mechanisms as a deliberate deferral (14.5). The wider identity ecosystem has moved toward selective-disclosure formats --- the EU Digital Identity wallet toward SD-JWT VC, ISO mDL toward mdoc --- in part because of the complexity of RDF canonicalization. Turn.io proposed profiling v1's Tier 2 on SD-JWT VC outright. That was not adopted, because SD-JWT VC is a distinct credential data model rather than a proof format, and adopting it would break the common envelope and the Open Badges alignment; permitting VC-JOSE-COSE obtains the canonicalization-free path and selective disclosure without either consequence. Draft 2 makes `eddsa-rdfc-2022` mandatory to verify, because it is what Open Badges verifiers already support, and keeps the others as options (14.5). Pilot evidence on which mechanisms were issued and verified, whether selective disclosure was exercised (14.9), and wallet and verifier support will inform whether v2 adds a second mandatory mechanism.
 
-**End-to-end encrypted storage.** Relevance ordering (7.3), conflict detection (15), and server-side checks on content (5.2.3) assume the provider can read entry content. Draft 3 resolves this at the interface boundary: under the `storage_encryption` declaration `e2e`, those steps are performed within the Context Subject's trust domain, and the provider stores ciphertext (4.8). Pilot evidence on how often that domain is unreachable will show whether the design holds (G1.2).
+**End-to-end encrypted storage.** Relevance ordering (7.3), conflict detection (15), and server-side checks on content (5.2.3) assume the provider can read entry content. Draft 3 describes an interface arrangement: under the `storage_encryption` declaration `e2e`, those steps are performed within the Context Subject's trust domain, and the provider stores ciphertext (4.8). This arrangement remains under technical review (P1.1). Pilot evidence on how often that domain is unreachable will show whether the design holds (G1.2).
 
 **Federation.** Learning Economy Foundation reviewers pointed to wallet-attached storage, which lets a person hold and share artifacts through a storage provider of their choosing. Whether an HCP instance can be one such store, or whether the two compose some other way, is an input to the federation design.
 
