@@ -1,4 +1,4 @@
-> **DRAFT — Not for distribution.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
+> **Working draft for partner review — subject to change.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
 
 # Guides
 
@@ -10,13 +10,15 @@ HCP is a protocol, not a user experience pattern. How applications elicit contex
 
 ## G1.1 Recommended Sequence
 
-1. Stand up an HCP Provider: the reference implementation or a conformant third-party implementation.
+**Artifact status.** This is an implementation sequence to work toward, not a ready-to-run quickstart. The repository does not designate a validated Draft 3 reference implementation, and the behavioral conformance suite in section 20 has not yet been published. The [repository README](https://github.com/loyalagents/hcp-spec#drafts-and-available-artifacts) lists available artifacts and implementation projects with their own compatibility notes. Use synthetic context while investigating open design questions and implementation gaps.
+
+1. Select or build an HCP Provider for the draft and package under review. Record its revision, implemented behavior, and known gaps; a project listing does not establish conformance.
 2. Choose a package ([18.2](specification.md#182-packages)). If every HCP Client the pilot uses is operated by the Provider Operator, the First-Party package is available. If any client is operated by another organization, Provider Interop is required ([18.3](specification.md#183-when-provider-interop-is-required)).
 3. Register each HCP Client, identifying its Client Operator by an identifier and a name the person can recognize ([3.2.8](specification.md#328-client-operator-and-provider-operator)).
 4. Define the category scopes the pilot needs ([6.1.1](specification.md#611-scope-naming-convention)).
 5. Implement the bindings the package requires: the HTTP Binding, the MCP Binding, or both. MCP over stdio qualifies for First-Party only ([10.1](specification.md#101-scope)).
 6. If the pilot will accept `model-inferred` entries, implement the Memory Manager Profile ([4.7](specification.md#47-conflicts), [15](specification.md#15-memory-manager-profile)).
-7. Run the conformance test suite ([20](specification.md#20-conformance-testing)).
+7. Run the behavioral conformance suite when published ([20](specification.md#20-conformance-testing)), recording the draft, claims, and results. Until then, document the implementation-specific checks performed and the gaps that remain. The repository's schema/example checks do not substitute for this planned validation step or establish field-pilot readiness.
 8. Walk pilot participants through the authorization flow before data collection begins ([G4](#g4-authorization-interaction-patterns)).
 
 ## G1.2 What Pilots Should Record
@@ -43,10 +45,12 @@ Core governs behavior at the interface boundary, not internal storage (Part I). 
 
 Under `e2e`, the HCP Provider stores ciphertext, and a component the person controls does the work that needs to read it ([4.8](specification.md#48-encrypted-storage)). That has consequences a deployment should plan for.
 
+**Open design questions.** Confidential delivery to the recipient, independently trustworthy authorization at the subject's component, content-bearing metadata, and deletion/replay behavior remain under investigation ([P1.1](path-to-v2-final.md#p11-before-v2-is-final)). The following deployment considerations do not establish that these boundaries have been implemented or validated. See [PR #18](https://github.com/loyalagents/hcp-spec/pull/18) for the non-normative findings and candidate remedies.
+
 - **Reachability.** A query needs the trust-domain component. Where it runs on a phone that is off or out of coverage, the query fails with subject unavailable and the client tries later. Deployments where people are often offline, or share devices, should weigh this before choosing `e2e` ([G3](#g3-health-guide)).
 - **Keys.** If the person loses every copy of their keys, their content is lost with them. Recovery that does not hand the keys to the operator needs designing: a recovery key the person keeps, or keys held by several of their own devices.
 - **What the operator still sees.** Categories, timing and provenance stay readable ([4.8](specification.md#48-encrypted-storage)). For some people, which categories they hold is itself sensitive; `e2e` does not hide it.
-- **Erasure.** Destroying keys is a dependable way to make content unrecoverable, backups included ([5.4.2](specification.md#542-hard-deletion)).
+- **Erasure.** Key destruction can make encrypted content unrecoverable only if all relevant key copies are destroyed and no recoverable plaintext remains; unencrypted members also need removal ([5.4.2](specification.md#542-hard-deletion)). The treatment of retained response bodies and replay after deletion is an open question ([P1.1](path-to-v2-final.md#p11-before-v2-is-final)).
 # G2. Education Guide
 
 This guide assembles Core, the General Context Profile ([11](specification.md#11-general-context-profile)), the Education Context Profile ([16.4](specification.md#164-education-context-profile)), and the VC Evidence Profile ([14](specification.md#14-vc-evidence-profile)) for education pilots.

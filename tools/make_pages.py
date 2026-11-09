@@ -75,7 +75,7 @@ def main(src, out, version):
                 assert i >= 0, key
                 e = t.find('\n\n', i + 1)
                 t = t[:e] + f'\n\n![{alt}]({img})\n\n*{alt}.*' + t[e:]
-        head = (f'> **DRAFT \u2014 Not for distribution.** Human Context Protocol (HCP) v2, Draft Specification, version {version}. '
+        head = (f'> **Working draft for partner review \u2014 subject to change.** Human Context Protocol (HCP) v2, Draft Specification, version {version}. '
                 f'Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)\n\n')
         foot = '\n---\n\nThe specification text is licensed under CC BY 4.0 ([LICENSE-SPEC.md](../../LICENSE-SPEC.md)). These pages are built from the same source as the Word document by `tools/make_pages.py`; where they differ, please report it as an issue.\n'
         open(os.path.join(out, page), 'w', encoding='utf-8').write(head + t.strip('\n') + '\n' + foot)

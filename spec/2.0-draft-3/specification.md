@@ -1,4 +1,4 @@
-> **DRAFT — Not for distribution.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
+> **Working draft for partner review — subject to change.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
 
 # Specification
 
@@ -3664,7 +3664,7 @@ This section describes the HCP Conformance Test Suite. It places no requirement 
 
 ## 20.1 Scope of the Suite
 
-The suite, to be published alongside this specification, will provide:
+The behavioral suite is planned and has not yet been published alongside this draft. The repository's schema/example checker is available, but does not exercise a running implementation. The planned suite will provide:
 
 - Automated schema validation of entries against the published JSON Schema ([4.1.1](#411-processing-requirements), [Appendix A](#appendix-a-registries-and-published-artifacts)), and of credentials under the VC Evidence Profile ([14](#14-vc-evidence-profile)).
 - Grant semantics tests — category scoping, temporary-by-default, expiry bounds, revocation propagation, and the prohibition on silent scope expansion — applicable to all implementations, verified against the grant representation in 6.1.5.
@@ -3688,7 +3688,7 @@ A grant created through the hook is not created by an act of the Authorizing Pri
 
 ## 20.3 Pilots
 
-Pilot implementations are expected to run the test suite before integration with field pilots ([G1](guides.md#g1-pilot-onboarding)).
+Pilot implementations are expected to run the test suite before integration with field pilots ([G1](guides.md#g1-pilot-onboarding)). This is a planned readiness step: the suite is not yet published. Schema/example checks are not a substitute for the behavioral tests described above, and their success alone does not demonstrate field-pilot readiness. Record the draft, implementation revision, checks performed, and remaining evidence gaps when discussing a pilot.
 # Part V — Security and Privacy Considerations
 
 This Part is informative. It explains what the Specification protects against and what it leaves to others.

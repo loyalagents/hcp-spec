@@ -1,4 +1,4 @@
-> **DRAFT — Not for distribution.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
+> **Working draft for partner review — subject to change.** Human Context Protocol (HCP) v2, Draft Specification, version 2.0-draft-3. Pages: [Introduction](introduction.md) · [Specification](specification.md) · [Guides](guides.md) · [Path to v2 Final](path-to-v2-final.md)
 
 # Path to v2 Final
 
@@ -8,13 +8,18 @@ This page says what remains open before v2 is final ([P1](#p1-roadmap)), what ch
 
 This section is written for all audiences, not only implementers. Pilot partners, policymakers, and anyone deciding whether HCP fits their use case need to know what remains open without reading the protocol sections. It is plain language, not requirements language. Each item below names where in this specification it will land, so that the roadmap points at a Part rather than a gap.
 
-Draft 4 will take in comments on Draft 3, the findings of the HCP Development and Testing working group, Richard Whitt's (GliaNet) analysis of the fiduciary layer, and Turn.io's conformance suite. None had arrived when Draft 3 was assembled.
+Draft 4 is intended to take in comments on Draft 3, the findings of the HCP Development and Testing working group, Richard Whitt's (GliaNet) analysis of the fiduciary layer, and Turn.io's conformance work. None had arrived when Draft 3 was assembled; this is a list of expected inputs, not a statement that those artifacts are available or that contributors have committed to a release date.
 
 ## P1.1 Before v2 Is Final
 
 | Item | What remains open | Home |
 |--------------------------------|------------------------------------------------------------------|------------|
 | Permanent namespace | The placeholder hcp.example is replaced by a permanent namespace. The maintainers hope to secure hcp.me. | 1.7, Appendix A |
+| E2E confidentiality and trust boundaries | Decide what `e2e` guarantees during processing and delivery; trace how authorized clients receive plaintext without exposing it to provider-operated components. Address recipient authentication, the active-provider threat model, and content-bearing metadata. | 4.8, 9, 10, 19, 21; G1.4 |
+| Hard deletion and response replay | Resolve the interaction between unrecoverable hard deletion and the requirement to retain and replay original write responses. The intended retry outcome and treatment of retained response content need an explicit decision. | 5.4.2, 9.6 |
+| Implementation and validation evidence | Publish the behavioral suite and document what has been exercised against specific drafts, bindings, and claims. Schema/example checks alone do not demonstrate interoperability or security guarantees. | 18, 20; G1 |
+
+The encryption and lifecycle rows summarize open findings in [the encryption design investigation (PR #18)](https://github.com/loyalagents/hcp-spec/pull/18). The review and its candidate remedies are non-normative; this roadmap does not adopt a new transport, cryptographic suite, or retry rule. These questions are part of the current partner review, rather than completed guarantees. Further findings may add work before a final release.
 
 ## P1.2 Done in Draft 2
 
@@ -22,7 +27,7 @@ Every item planned for Draft 2 was done in Draft 2 ([P3](#p3-changelog)).
 
 ## P1.3 Done in Draft 3
 
-Every item planned for Draft 3 is done in this draft ([P3](#p3-changelog)). What remains open is in P1.4.
+Draft 3 includes the planned sections and features summarized in P3. Their inclusion does not establish that every design question is resolved or every behavior has been validated. P1.1 records the current issues to resolve before final; P1.4 records later work.
 
 ## P1.4 Later
 
@@ -57,7 +62,7 @@ v1 §7.12, specification architecture and the actor model, is resolved by this d
 
 **Credential format.** v1 permitted two securing mechanisms as a deliberate deferral ([14.5](specification.md#145-securing-credentials)). The wider identity ecosystem has moved toward selective-disclosure formats — the EU Digital Identity wallet toward SD-JWT VC, ISO mDL toward mdoc — in part because of the complexity of RDF canonicalization. Turn.io proposed profiling v1's Tier 2 on SD-JWT VC outright. That was not adopted, because SD-JWT VC is a distinct credential data model rather than a proof format, and adopting it would break the common envelope and the Open Badges alignment; permitting VC-JOSE-COSE obtains the canonicalization-free path and selective disclosure without either consequence. Draft 2 makes `eddsa-rdfc-2022` mandatory to verify, because it is what Open Badges verifiers already support, and keeps the others as options ([14.5](specification.md#145-securing-credentials)). Pilot evidence on which mechanisms were issued and verified, whether selective disclosure was exercised ([14.9](specification.md#149-selective-disclosure)), and wallet and verifier support will inform whether v2 adds a second mandatory mechanism.
 
-**End-to-end encrypted storage.** Relevance ordering ([7.3](specification.md#73-relevance-ordering)), conflict detection ([15](specification.md#15-memory-manager-profile)), and server-side checks on content ([5.2.3](specification.md#523-create)) assume the provider can read entry content. Draft 3 resolves this at the interface boundary: under the `storage_encryption` declaration `e2e`, those steps are performed within the Context Subject's trust domain, and the provider stores ciphertext ([4.8](specification.md#48-encrypted-storage)). Pilot evidence on how often that domain is unreachable will show whether the design holds ([G1.2](guides.md#g12-what-pilots-should-record)).
+**End-to-end encrypted storage.** Relevance ordering ([7.3](specification.md#73-relevance-ordering)), conflict detection ([15](specification.md#15-memory-manager-profile)), and server-side checks on content ([5.2.3](specification.md#523-create)) need access to entry content. Draft 3 assigns those steps to the Context Subject's trust domain under the `storage_encryption` declaration `e2e`, while the provider stores ciphertext ([4.8](specification.md#48-encrypted-storage)). That assignment does not by itself specify confidential delivery to the authorized client or resolve the trust and lifecycle questions in P1.1. The deployment guidance describes the intended arrangement; it is not evidence of a validated E2E implementation. Pilot evidence should also record how often the subject's component is unreachable ([G1.2](guides.md#g12-what-pilots-should-record)).
 
 **Federation.** Learning Economy Foundation reviewers pointed to wallet-attached storage, which lets a person hold and share artifacts through a storage provider of their choosing. Whether an HCP instance can be one such store, or whether the two compose some other way, is an input to the federation design.
 
@@ -109,7 +114,7 @@ A v1 → v2 section map, recording where each v1 section went and listing every 
 
 *This document is a working draft developed under the Loyal Agents initiative, a joint venture of Stanford University and Consumer Reports. It has not been formally reviewed or endorsed by Stanford University, Consumer Reports, or any convening partner.*
 
-*DRAFT — Not for distribution*
+*DRAFT — Working draft for partner review; subject to change*
 
 ---
 
