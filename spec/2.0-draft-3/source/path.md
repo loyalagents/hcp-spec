@@ -56,6 +56,7 @@ Draft 3 includes the planned sections and features summarized in P3. Inclusion i
 | Recipient assurance | Whether a grant can require evidence about the receiving system before release, such as remote attestation of its execution environment, a declaration of its protection regime, or listing in a trust registry. | 6.1.5, 13 | W4 (Saturn paper, VTI comparison) |
 | Signed export bundle | An export a receiving provider can verify came unaltered from the exporting provider (5.4.1, 5.4.3). | 5.4 | W4 (VTI comparison) |
 | Unlinkable credential disclosure | Disclosure that two presentations of one credential cannot link, such as the BBS cryptosuite, once it is a W3C Recommendation and verifiers support it (14.9). | 14.5, 14.9 | V5 |
+| Approval under pre-agreed rules | Whether an agent, or a rule the person agreed in advance, may approve grants for them. Draft 3 requires a person, the Context Subject or a delegate, to approve each grant, and standing rules only deny (3.2.2, 6.3, 17.4). A profile would have to say who answers for such approvals, what they may never approve (High-sensitivity categories, persistence, onward sharing), and how the person reviews and revokes them. | 6.1.6, 17, a new profile | ToIP Trust Tasks WG |
 
 Elicitation --- how applications draw context out of a person --- is out of scope and stays in the Guides.
 
