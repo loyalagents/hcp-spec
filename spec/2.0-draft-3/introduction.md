@@ -186,6 +186,7 @@ Alignment on shared standards, and on the vocabulary questions deferred to a lat
 | Model Context Protocol (MCP) | Revision 2026-07-28 | Connecting AI applications to tools and data |
 | Agent2Agent (A2A) | Linux Foundation; 1.0 | Letting agents from different vendors find each other and hand over tasks |
 | Solid | W3C Solid Community Group, Protocol 0.11; the Linked Web Storage Working Group | Personal data stores, under the person's access control, on web standards |
+| Portable Web Spaces (PWS) | W3C Credentials Community Group; unofficial draft 0.5, formerly Wallet Attached Storage | Permissioned storage the person controls, with access by capabilities rooted in their DID |
 
 HCP focuses on letting a person decide which applications and agents may receive their context, for what purposes and duration, and see the provider's record of HCP accesses and disclosures. Client behavior after disclosure remains subject to the limits described in 21.1.
 
@@ -231,6 +232,8 @@ The two can be used together: an agent that receives a task over A2A, and needs 
 - **Record.** HCP requires a log the person can read of HCP accesses and disclosures ([8](specification.md#8-audit)).
 
 An HCP Provider could keep its entries in a Solid store.
+
+**Portable Web Spaces (PWS).** PWS, formerly Wallet Attached Storage, is a general-purpose permissioned storage API: every request is authorized by capabilities rooted in a DID the person controls. Like Solid, it stores any kind of data and controls access to resources. HCP adds the entry model, grants for stated purposes and a stated time, and a log the person reads ([4](specification.md#4-data-model), [6.1](specification.md#61-grant-model), [8](specification.md#8-audit)). An HCP Provider could likewise keep its entries in a PWS space. Learning Economy Foundation reviewers raised wallet-attached storage as an input to the federation design ([P1.5](path-to-v2-final.md#p15-notes-carried-from-v1)).
 
 Two efforts closer to HCP's own scope, 1EdTech's Trusted Portable Learning Context and the Personal Data Portability Protocol, are described in I10. Other work on moving AI memory between systems includes the W3C AI Agent Memory Interoperability Community Group, launched in June 2026, and MacPaw's Portable Memory format, proposed in July 2026.
 
