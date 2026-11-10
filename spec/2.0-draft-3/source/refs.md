@@ -61,3 +61,4 @@ A normative reference is one an implementation needs in order to conform. Where 
 | Open Memory Protocol | Open Memory Protocol, early drafts, Open Memory Protocol Initiative (AI Disclosures Project, co-hosted by Mozilla and IBM). https://github.com/SMJAI/open-memory-protocol | I4, I11 |
 | TPLC | Trusted Portable Learning Context, 1EdTech. https://www.1edtech.org/ai/tplc | I10, I11 |
 | PDPP | Personal Data Portability Protocol, PDP-Connect (Linux Foundation Decentralized Trust). https://pdpp.dev/ | I10, I11, 6.1.5.2 |
+| DIF Delegated Authority Evaluations | Delegated Authority Evaluations, Editor's Draft, Decentralized Identity Foundation. https://identity.foundation/delegated-authority-evaluations/ | I10 |
