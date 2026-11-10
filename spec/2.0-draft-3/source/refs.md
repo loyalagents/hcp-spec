@@ -58,6 +58,7 @@ A normative reference is one an implementation needs in order to conform. Where 
 | Personal Agent Protocol 0.3 | Personal Agent Protocol, draft 0.3, Sierra and Meta. https://personalagentprotocol.org/docs/0.3/spec | I4, I11 |
 | A2A 1.0 | Agent2Agent (A2A) Protocol 1.0, Linux Foundation. https://a2a-protocol.org/ | I4, I11 |
 | Solid Protocol 0.11 | Solid Protocol, version 0.11, W3C Solid Community Group. https://solidproject.org/TR/protocol | I11 |
+| PWS 0.5 | Portable Web Spaces, unofficial draft 0.5 (formerly Wallet Attached Storage), W3C Credentials Community Group. https://portablewebspaces.org | I11, P1.5 |
 | Open Memory Protocol | Open Memory Protocol, early drafts, Open Memory Protocol Initiative (AI Disclosures Project, co-hosted by Mozilla and IBM). https://github.com/SMJAI/open-memory-protocol | I4, I11 |
 | TPLC | Trusted Portable Learning Context, 1EdTech. https://www.1edtech.org/ai/tplc | I10, I11 |
 | PDPP | Personal Data Portability Protocol, PDP-Connect (Linux Foundation Decentralized Trust). https://pdpp.dev/ | I10, I11, 6.1.5.2 |
