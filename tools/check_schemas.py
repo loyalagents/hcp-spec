@@ -235,6 +235,61 @@ for sec in ('10.3.1', '10.3.2', '10.3.3', '10.3.4', '10.3.5') + (('10.3.6',) if 
     except Exception as e: ok = False
     check(ok, f'{sec} {t["name"]}: inputSchema is valid JSON Schema 2020-12')
 
+# Draft 3 completion is an exact, content-free result, never an ordinary read.
+# These are artifact checks, not evidence that a provider committed or authorized
+# an operation. The request/release cases in 5.6 and 9.6 need runtime tests.
+if _OLD is not None:
+    name = 'operations/completion-result'
+    check(sid(name) in schemas, 'Draft 3 publishes the completion-only result schema')
+    if sid(name) in schemas:
+        minimal = {'outcome': 'committed', 'representation': 'not-included'}
+        validate(name, ex('5.6'), '5.6 exact completion-only example')
+        check(ex('5.6') == minimal, '5.6 example is exactly the fixed completion fact')
+        for operation in ('create', 'revise', 'withdraw', 'import'):
+            validate('operations/' + operation + '-result', minimal,
+                     operation + ' admits completion when its operation contract allows it')
+        for changed in ({}, {'outcome': 'committed'},
+                        {**minimal, 'representation': 'included'},
+                        *({**minimal, key: 'withheld'} for key in
+                          ('id', 'ref', 'version', 'timestamp', 'content', 'detail'))):
+            check(not validator(name).is_valid(changed),
+                  'completion-only rejects missing, changed or additional members: ' + repr(changed))
+        ordinary = {**ex('11.4'), **minimal}
+        validate('entry', ordinary, 'ordinary stored entry preserves similarly named extensions')
+        validate('operations/create-result', ordinary, 'authorized ordinary result preserves extensions')
+        check(not validator(name).is_valid(ordinary),
+              'ordinary result with marker extensions is never completion-only')
+        check(not validator('operations/query-result').is_valid(minimal) and
+              not validator('operations/get-entry-result').is_valid(minimal),
+              'query and get do not admit completion-only results')
+        check(not validator('operations/query-result').is_valid({**ex('9.4.1', 1), 'entries': [minimal]}) and
+              not validator('operations/get-entry-result').is_valid({**ex('9.4.2'), 'entry': minimal}),
+              'read entry unions do not admit completion in place of an entry')
+        validate('operations/withdraw-result', {
+            'entryId': 'urn:uuid:7d1e4b2a-0c9f-4a61-8e3d-5b6a7c8d9e0f',
+            'status': 'deleted', 'hardDeleted': True, 'timestamp': '2026-10-27T15:40:00Z'},
+            'ordinary hard-delete result remains valid; its contract does not select completion')
+        validate('operations/import-result', {'outcomes': [], 'dryRun': True},
+                 'ordinary empty dry-run import remains valid')
+        check(not validator(name).is_valid({**minimal, 'dryRun': True}),
+              'a dry-run member cannot be smuggled into completion-only')
+        wire = ex('9.4.3')
+        check(wire == minimal, '9.4.3 HTTP completion body contains no resource data')
+        http_section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('### 9.4.3 Create', 1)[1].split('### 9.4.4 Revise', 1)[0]
+        header_match = re.search(r'    HTTP/1\.1 201 Created\n((?:    [^\n]+\n)+)\n', http_section)
+        headers = dict(line.strip().split(': ', 1) for line in header_match[1].splitlines()) if header_match else {}
+        check(headers == {'Content-Type': 'application/ld+json', 'HCP-Version': '2.0'},
+              '9.4.3 completion example has version/media headers and no resource headers')
+        tool = ex('10.3')
+        content = tool.get('content', [])
+        try:
+            text_copy = json.loads(content[0]['text']) if len(content) == 1 and content[0].get('type') == 'text' else None
+        except (KeyError, ValueError, TypeError):
+            text_copy = None
+        check(tool.get('isError') is False and tool.get('structuredContent') == minimal and
+              text_copy == minimal,
+              '10.3 completion success has matching structured and JSON text content')
+
 print('\nFindings (template comparisons):' if findings else '\nNo template findings.')
 for f in findings: print('  - ' + f)
 print('ALL PASS' if not fails else f'{len(fails)} FAIL')

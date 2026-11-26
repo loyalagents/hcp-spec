@@ -256,6 +256,16 @@ def rc(frag):
     return {'$ref': '../common.json#/$defs/' + frag}
 entry_or_disclosure = {'anyOf': [r('disclosure'), r('entry')],
                        'description': 'A disclosure where the requester is a Context Client (7.4); otherwise the entry.'}
+if D3:
+    op('completion-result', 'Completion-only result', '5.6',
+       obj({'outcome': {'const': 'committed'}, 'representation': {'const': 'not-included'}},
+           ['outcome', 'representation'], additionalProperties=False,
+           description='Exactly the successful completion fact. Only permitted by the operation contract after known successful commit and required durable audit; no resource representation or extra members.'))
+def write_result(ordinary):
+    # Keep the read union unchanged, and keep Draft 2 output byte-for-byte stable.
+    return ({'anyOf': [ordinary, {'$ref': 'completion-result.json'}],
+             '$comment': '5.6 governs when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative.'}
+            if D3 else ordinary)
 TS = DT
 op('query-request', 'Query request', '5.2.1', {'type': 'object', 'properties': {
     'query': {'type': 'string', 'minLength': 1}, 'categories': arr(rc('category')), 'purpose': rc('purposeCode'),
@@ -282,7 +292,7 @@ op('create-request', 'Create request', '5.2.3, 9.4.3', {'type': 'object', 'prope
                                                                      ['act', 'entry', 'rationale', 'weighed'])} if D3 else {})), ['type', 'target']))}, ['provenance'])},
     'required': ['schema', 'subject', 'content', 'classification', 'assertion', 'record'],
     '$comment': 'An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider.'})
-op('create-result', 'Create result', '5.2.3', entry_or_disclosure)
+op('create-result', 'Create result', '5.2.3, 5.6' if D3 else '5.2.3', write_result(entry_or_disclosure))
 op('revise-request', 'Revise request', '5.2.4, 9.4.4', {'type': 'object', 'properties': dict(named_entry, **{
     'expectedVersion': {'type': 'integer', 'minimum': 1}, 'content': rc('content'), 'evidence': rc('evidence'),
     'reason': {'type': 'string', 'minLength': 1},
@@ -292,11 +302,11 @@ op('revise-request', 'Revise request', '5.2.4, 9.4.4', {'type': 'object', 'prope
     'required': ['expectedVersion', 'content', 'reason'],
     'not': {'anyOf': [{'required': ['subject']}, {'required': ['classification']}]},
     '$comment': 'A revision does not change subject or classification (5.2.4). The HTTP Binding names the entry in the path (9.4.4).'})
-op('revise-result', 'Revise result', '5.2.4', entry_or_disclosure)
+op('revise-result', 'Revise result', '5.2.4, 5.6' if D3 else '5.2.4', write_result(entry_or_disclosure))
 op('withdraw-request', 'Withdraw request', '5.2.5', {'type': 'object', 'properties': dict(named_entry, reason={'type': 'string', 'minLength': 1}), 'required': ['reason']})
-op('withdraw-result', 'Withdraw result', '5.2.5, 9.4.5', {'type': 'object', 'properties': dict(named_entry, **{
+op('withdraw-result', 'Withdraw result', '5.2.5, 5.6, 9.4.5' if D3 else '5.2.5, 9.4.5', write_result({'type': 'object', 'properties': dict(named_entry, **{
     'status': {'const': 'deleted'}, 'hardDeleted': {'type': 'boolean'}, 'timestamp': TS}), 'required': ['status', 'timestamp'],
-    ('oneOf' if D3 else 'anyOf'): [{'required': ['ref']}, {'required': ['entryId']}]})
+    ('oneOf' if D3 else 'anyOf'): [{'required': ['ref']}, {'required': ['entryId']}]}))
 op('read-own-grant-result', 'Read own grant result', '5.2.6', r('grant'))
 if D3:
     op('report-sharing-request', 'Report onward sharing request', '5.2.8, 9.4.16', {'type': 'object', 'properties': {
@@ -306,10 +316,10 @@ if D3:
 op('import-request', 'Import request', '5.4.3, 9.4.11', {'type': 'object', 'properties': {
     'export': r('export') if D3 else {'type': 'object'}, 'dryRun': {'type': 'boolean'},
     'categoryMap': {'type': 'object', 'additionalProperties': rc('category')}}, 'required': ['export']})
-op('import-result', 'Import result', '5.4.3, 9.4.11', {'type': 'object', 'properties': {
+op('import-result', 'Import result', '5.4.3, 5.6, 9.4.11' if D3 else '5.4.3, 9.4.11', write_result({'type': 'object', 'properties': {
     'outcomes': arr(obj({'id': S, 'outcome': {'enum': ['imported', 'converted', 'skipped', 'rejected']}, 'reason': S}, ['id', 'outcome'],
                         allOf=[{'if': {'properties': {'outcome': {'const': 'rejected'}}}, 'then': {'required': ['reason']}}])),
-    'dryRun': {'type': 'boolean'}}, 'required': ['outcomes']})
+    'dryRun': {'type': 'boolean'}}, 'required': ['outcomes']}))
 summary_client = obj({
     'client': rc('clientDescription'),
     'grants': arr(obj({'grantId': rc('urnUuid'), 'status': {'enum': ['active', 'revoked', 'expired']}}, ['grantId', 'status'])),
