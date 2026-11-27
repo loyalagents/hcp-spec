@@ -1397,7 +1397,7 @@ Core defines the following errors. Each has a code, which bindings carry: the HT
 |-----------------------|------------------------|------------------------------------------------------------------|
 | invalid request | `malformed-request` | The request fails schema validation or a Core rule on its content |
 | unauthenticated | `invalid-token` | Missing, malformed, or expired authorization evidence |
-| not authorized | `scope-denied` | The request falls outside the caller's grant — its categories, actions, or purposes — the entry does not exist, or a historical response is no longer eligible for replay ([9.6](#96-idempotency)). The response MUST NOT disclose which. |
+| not authorized | `scope-denied` | The request falls outside the caller's grant — its categories, actions, or purposes — the entry does not exist, or no historical retry result is permitted ([9.6](#96-idempotency)). The response MUST NOT disclose which. |
 | conflict | `idempotency-conflict` | A retried request does not match the original ([9.6](#96-idempotency)) |
 | version conflict | `version-conflict` | The request names a version that is not the entry's current version ([5.2.4](#524-revise), [5.4](#54-governance-operations)) |
 | credential invalid | `credential-invalid` | A credential that is an entry's content fails verification: its proof, its securing mechanism, its verification method, or its status ([14.6](#146-ingest)). The detail names which, and does not reveal status-list internals. |
@@ -1417,7 +1417,7 @@ Once the operation's successful outcome and its required audit events are known 
 
 No other member is permitted in this result. It asserts only that this operation successfully committed, not that an entry remains active, unchanged or readable. It supplies no identifier, version, timestamp, provenance, policy explanation or content. Resource-specific headers, including `Location` and `ETag`, MUST also be withheld. The ordinary authorized entry remains extensible ([A.3](#a3-extension-points)); an entry carrying similarly named extension members is not this completion-only result.
 
-The provider MUST authorize the entire ordinary result, including headers and every binding representation, immediately before its irreversible handoff to transport. For context writes it uses the original grant and approved purpose, with current category, policy, narrowing, entry and disclosure deadlines. Permission to execute the already-committed write again is not a prerequisite for this disclosure check. A write-only grant receives completion without thereby acquiring read authority. Import uses the original principal's or delegate's management authority and its applicable scope, not a context grant. No result may silently switch or combine authorities. This check and permission changes MUST be ordered so that no stale prepared result escapes after a change takes effect; they do not wait for socket drain or remote acknowledgement.
+The provider MUST authorize the entire ordinary result, including headers and every binding representation, at the release decision. For a Context Client it uses the original grant, with applicable current category, policy, purpose and narrowing restrictions, entry validity and disclosure deadlines. Permission to execute the already-committed write again is not a prerequisite for this disclosure check. A write-only grant receives completion without thereby acquiring read authority. For a Management Client, create, revise, withdraw and import use the original principal's or delegate's management authority and applicable scope; they do not acquire a Context Client copy deadline. No result may silently switch or combine authorities. This decision and effective permission changes MUST be ordered so that no stale prepared result escapes after a change takes effect. No particular serialization callback, socket-drain wait or remote acknowledgement is required.
 
 This entitlement ends with the original response path. A lost reply does not undo a commit, and an uncertain commit MUST NOT be reported as successful or as rolled back without evidence. A later retry is a new request subject to current authentication and authorization; where HTTP idempotency is supported, 9.6 applies. A separate authorized read or management inspection may recover information. The original entitlement is not a credential or a new lookup operation.
 
@@ -1425,7 +1425,7 @@ Only a successfully completed requested operation qualifies. Merely committing a
 
 This rule concerns operations whose successful commit is already established. It does not authorize an operation to commit after its execution authority expires or is revoked, or specify a storage commit's cancellable boundary. Revocation cannot undo an already-committed operation, recall handed-off bytes or prove remote receipt.
 
-On every binding, an effective permission change affecting a prepared ordinary result MUST permanently invalidate that prepared result, even if permission is restored before handoff. Its original response uses completion only; restoration cannot revive the prepared representation. This applies to unkeyed requests as well as keyed requests. HTTP retained candidates additionally follow 9.6.
+On every binding, an effective permission change affecting a prepared ordinary result MUST permanently invalidate that prepared result, even if permission is restored before the release decision. Its original response uses completion only; restoration cannot revive the prepared representation. This applies to unkeyed requests as well as keyed requests. HTTP retained candidates additionally follow 9.6.
 
 | Ordering case | Required result |
 |---------------------------|------------------------------------------------------------------|
@@ -1892,7 +1892,7 @@ A get-entry response reports `method` as `none` ([7.3](#73-relevance-ordering)).
 
 Every disclosure carries `useUntil`. After that time, the HCP Client MUST NOT use the copy, or pass it on, without fetching it again ([3.12](#312-onward-disclosure)), except as a declared legal obligation requires ([6.2.5](#625-copies-kept-under-a-legal-obligation)).
 
-An idempotent replay does not create a fresh copy or extend this deadline. The provider MUST NOT replay a content-bearing response at or after its original `useUntil` ([9.6](#96-idempotency)). A separate authorized retrieval can produce a new disclosure and its own audit event.
+An idempotent replay does not create a fresh copy or extend this deadline. The provider MUST NOT replay a content-bearing response at or after its original `useUntil` ([9.6](#96-idempotency)). The exact, currently authorized retry may instead receive completion without content only as 9.6 permits; that reply creates no new copy. A separate authorized retrieval can produce a new disclosure and its own audit event.
 
 The HCP Provider sets `useUntil` at disclosure:
 
@@ -2216,17 +2216,17 @@ Response (200), shown for a General Context entry disclosed to a Context Client 
 
 ### 9.4.3 Create
 
-`POST /v2/entries`. The request body is an entry in the form specified in 4.2, carrying the request fields in 5.2.3 and omitting the fields the HCP Provider assigns. Response (201): the created entry with provider-assigned fields populated, as a disclosure for a Context Client, or the completion-only result ([5.6](#56-completion-and-response-disclosure)).
+`POST /v2/entries`. The request body is an entry in the form specified in 4.2, carrying the request fields in 5.2.3 and omitting the fields the HCP Provider assigns. Response (201): the created entry with provider-assigned fields populated, as a disclosure for a Context Client. The completion-only alternative ([5.6](#56-completion-and-response-disclosure)) uses status 200.
 
 **Response: HCP Provider → original caller (committed create, representation withheld)**
 
-    HTTP/1.1 201 Created
+    HTTP/1.1 200 OK
     Content-Type: application/ld+json
     HCP-Version: 2.0
 
     { "outcome": "committed", "representation": "not-included" }
 
-The same completion-only body uses 201 for a revision ([9.4.4](#944-revise)) and 200 for withdrawal or non-dry-run import ([9.4.5](#945-withdraw-and-hard-delete), [9.4.11](#9411-import)). It carries no resource-specific `Location` or `ETag`. It is not a new 204 mapping or an HTTP preference that can override Core.
+The exact completion-only body uses 200 for create, revision, withdrawal and non-dry-run import (9.4.3–9.4.5, [9.4.11](#9411-import)), including an authorized copy-expiry retry under 9.6. Ordinary create/revise responses retain 201. It carries no resource-specific `Location` or `ETag`. It is not a new 204 mapping or an HTTP preference that can override Core.
 
 ### 9.4.4 Revise
 
@@ -2249,7 +2249,7 @@ The same completion-only body uses 201 for a revision ([9.4.4](#944-revise)) and
       "reason": "Correction by the Context Subject during conversation"
     }
 
-The body MAY also carry the optional fields in 5.2.4. Response (201): the revised entry, with `record.version` incremented by 1, as a disclosure for a Context Client, or the completion-only result ([5.6](#56-completion-and-response-disclosure)). The entry's `id` is unchanged by a revision. Where `expectedVersion` is not the current version, the response is version conflict ([9.7](#97-errors)), except that an authorized eligible idempotent retry returns its retained result without executing the revision again ([9.6](#96-idempotency)).
+The body MAY also carry the optional fields in 5.2.4. Response (201): the revised entry, with `record.version` incremented by 1, as a disclosure for a Context Client. The completion-only alternative ([5.6](#56-completion-and-response-disclosure), [9.6](#96-idempotency)) uses status 200. The entry's `id` is unchanged by a revision. Where `expectedVersion` is not the current version, the response is version conflict ([9.7](#97-errors)), except that an authorized idempotent retry follows 9.6 without executing the revision again.
 
 ### 9.4.5 Withdraw and Hard Delete
 
@@ -2454,42 +2454,72 @@ A bare sequence number or offset does not satisfy the opacity requirement. A pil
 
 ## 9.6 Idempotency
 
-`POST /v2/entries` and `POST /v2/entries/{entryId}/revisions` MUST accept an `Idempotency-Key` request header, and clients SHOULD send one. `DELETE /v2/entries/{entryId}` SHOULD accept it. This section does not add idempotency keys to import or to MCP tool arguments, or authorize automatic retries of unkeyed operations.
+`POST /v2/entries` and `POST /v2/entries/{entryId}/revisions` MUST accept an `Idempotency-Key` request header, and clients SHOULD send one. `DELETE /v2/entries/{entryId}` SHOULD accept it; clients MUST NOT automatically retry withdrawal unless support is known. This section adds no key to import or MCP tool arguments, and does not authorize automatic retries of unkeyed operations.
 
-**Identity and retention.** The key namespace is the provider's instance for the Context Subject, the authenticated HCP Client, and its context or management capacity. Bind a committed key to its original grant or management authorization, operation, exact target and request body. Another grant for that client MUST NOT make the same key a fresh operation or expose the old result. Different clients and subjects have independent namespaces. An identical body means identical UTF-8 body octets: whitespace and member ordering differences count as differences. Providers need not retain the raw body to compare it.
+**Identity.** The key namespace is the provider's instance for the Context Subject, the authenticated HCP Client, and its context or management capacity. Bind a committed key to its original grant or management authorization, operation, exact target and identical UTF-8 body octets. Whitespace and member ordering differences count as differences; raw bodies need not be retained to compare them. Another grant MUST NOT make the same consumed key fresh or expose its match, conflict or result. Refreshing a token under unchanged authority preserves the namespace; re-registration that changes the authenticated client identity does not recover the old operation.
 
-The provider MUST retain duplicate-suppression information for at least 24 hours from successful commit. The mutation, its required audit and its committed key/result binding MUST become durable together: recovery cannot treat a committed operation as new because its reply was lost. Uncommitted validation or authorization failures do not consume a key. Providers MAY retain keys longer; clients cannot assume suppression after the retention interval. Removing a response payload MUST NOT remove duplicate protection during that interval. This retention rule does not override hard deletion ([5.4.2](#542-hard-deletion)) or authorize retention of erased content.
+**Effects and durability.** A protected keyed write MUST cause at most one mutation and one set of required operation events, including through concurrent requests, lost replies and restart. Duplicate protection MUST last at least 24 hours from successful commit. Recovery MUST preserve the operation, its required durable audit and its key/result binding so a committed write cannot execute again. This specifies observable recovery, not a database layout or transaction spanning every store. Providers MAY retain protection longer. Confirmed no-effect failures do not consume a fresh key; denial of a retry does not clear a key consumed earlier. While an operation may have committed, it MUST NOT be executed again.
 
-**Retained result and fresh authority.** At commit the provider records a role-correct result candidate: the ordinary representation where authorized, otherwise the fixed completion-only result ([5.6](#56-completion-and-response-disclosure)). This is distinct from what the original channel ultimately received. For example, a token can expire after a content candidate was committed, so the original reply carries only completion; a fresh token under the unchanged grant may still retrieve the original candidate while it remains eligible.
+**Original result.** At commit, establish a role-correct result candidate: the ordinary representation where authorized, otherwise the fixed completion-only result ([5.6](#56-completion-and-response-disclosure)). The provider MAY store a response or enough information to reproduce it. The original result means its associated success status and JSON member values, including time-varying values as selected at commit, not serialization bytes or transport headers. It MUST NOT be replaced with current entry data, reprojected content, refreshed standing or a renewed copy deadline. Resource-specific headers still require current release authority.
 
-Every retry requires fresh authentication and current authority for the attempted operation and the original result, under the same original authorization. The provider MUST make these checks before revealing a key match, conflict or result. Invalid authorization evidence yields unauthenticated; insufficient current authority, a different grant or an ineligible original result yields not authorized, without disclosing the prior operation's existence or outcome. Only after these checks may a different operation, target or body yield `idempotency-conflict` ([9.7](#97-errors)).
+The candidate is distinct from the reply actually sent. For example, token expiry after commit can make the original reply completion-only; refreshed evidence for the same unchanged grant can recover a still-eligible ordinary candidate. A write-only completion candidate cannot become a content or reference result after widening. An ordinary Context Client create/revise candidate carries `ref` and `version`, never the stored `id` and `record.version` ([7.4](#74-disclosures-to-context-clients)). An ordinary withdrawal acknowledgement retains the original request's `ref` or `entryId`; completion carries neither.
 
-For an exact, authorized retry within the retention interval, the provider MUST return the retained eligible candidate and original success status without repeating the mutation, its optimistic-version check or its audit event. Its identifiers remain role-specific: a content-bearing create or revise result for a Context Client carries `ref` and `version`, never the stored entry's `id` and `record.version` ([7.4](#74-disclosures-to-context-clients)). An ordinary withdrawal acknowledgement retains the identifier used in the original request: `ref` for a Context Client or `entryId` for a Management Client ([5.2.5](#525-withdraw)). Completion carries neither identifier. A retained completion-only candidate requires current authority for its original operation, target and purpose, but no read reach. This is authorization of a historical result, not continuation of the original response entitlement.
+**Current authority.** Every retry requires fresh authentication and current authority for both the presented operation and the historical operation/result under the same original authorization. These checks MUST precede any key-dependent reply, including completion, conflict or temporary uncertainty. Do not rerun optimistic-version or other execution preconditions consumed by the original successful operation. Invalid evidence yields unauthenticated. Insufficient authority, a replacement grant or an ineligible historical result yields opaque not authorized, except for the exact copy-expiry case below; do not disclose prior existence or outcome. Only an otherwise-authorized mismatch against an eligible historical result yields `idempotency-conflict`.
 
-**Invalidation.** When an effective permission change affects the original authorization context, the provider MUST permanently invalidate its prepared and retained response candidates and discard cached response payloads. This includes revocation and applicable policy, scope, purpose or narrowing changes, even if permissions are restored before the next request. Invalidation MUST be durable no later than acknowledgement of the change; restart or a previously prepared handoff cannot resurrect a discarded candidate. Unaffected grants and clients retain their eligible candidates. Refreshing a token without changing authority is not itself a permission change. This is response invalidation, not a claim to erase authoritative entry/history records or recipients' copies.
+Current active lifecycle, current and selected-version purpose/validity restrictions, and the original `useUntil` govern content-bearing Context Client results. A historical withdrawal acknowledgement may remain authorized after withdrawal because it discloses no entry content. A retained completion candidate requires current authority for its original operation and target, including applicable purpose restrictions, but no read reach. Management results retain their management scope and do not acquire a Context Client copy deadline.
 
-Current lifecycle, current and selected-version purpose/validity restrictions, and the original disclosure's `useUntil` also govern a content-bearing Context Client replay. An inactive entry cannot become readable through replay. A historical withdrawal acknowledgement can remain eligible after withdrawal because it is not an entry-content disclosure; management results remain subject to their management scope. The provider MUST recheck eligibility after serialization, at irreversible transport handoff, without waiting for receipt. A prepared response invalidated in the meantime MUST NOT escape.
+**Exact retry result.** Within the protected interval, an exact authorized retry MUST return the eligible original candidate and its original success status without a second mutation or operation event. There is one copy-expiry exception: if the operation and required audit are known committed and the original content copy's `useUntil` is the sole failed eligibility condition, the exact retry MUST instead return the fixed completion object ([5.6](#56-completion-and-response-disclosure)) with HTTP 200 and no resource-specific headers. All other authority, lifecycle, selected-version and validity conditions still apply. An assertion or credential that has itself expired is not copy-only expiry. No content, identifier, fresh copy or extended deadline accompanies this result.
 
-An ineligible or discarded candidate yields not authorized, never a replacement success or repeated mutation. Do not downgrade an invalidated content candidate to completion, promote a minimal candidate after widening, reproject an old version, refresh its standing or extend its copy deadline. Ordinary eligible candidates MUST remain available throughout the retention interval; arbitrary early eviction is not an authorization change. A separate authorized retrieval may return a fresh disclosure and append its own read event. Denial or loss of a reply does not assert rollback.
+A mismatch in operation, target or body cannot use the expiry exception. If its historical result is ineligible, including through copy expiry, it receives opaque denial before any conflict detail. Other ineligibility or permission invalidation also denies an exact retry; it cannot be converted to completion. The exception discloses only the historical commit and does not continue the original request's entitlement.
 
-| Retry case | Outcome within the retention interval |
-|---------------------------|------------------------------------------------------------------|
-| Same key/body/operation/target, unchanged authority, eligible candidate | Original status and retained result; one mutation and one set of operation events |
-| Fresh token for the same unchanged grant; original content candidate still eligible | Retained content candidate, even if the original wire reply was completion-only or lost |
-| Original write-only completion candidate; same unchanged write authority | The same fixed completion result, no new read authority |
-| Different body/operation/target, with authority for both attempted operation and historical result | Conflict; no change |
-| Invalid credential, or another grant, insufficient current authority, invalidated result or expired copy | Applicable authentication/authorization denial; no result-existence detail or repeated mutation |
-| Narrowing then restoration, or restart after invalidation | Candidate stays invalidated; original operation stays consumed |
+**Permission changes.** An effective permission change MUST permanently invalidate each prepared or retained candidate whose authorization it actually affects, including across narrowing then restoration. For retained HTTP candidates, a provider MAY conservatively invalidate all earlier candidates under a grant when that grant's permissions, or a governing policy applicable to it, genuinely change. Precise invalidation is also permitted; actually affected results MUST be invalidated in either case. Cached response payloads of every invalidated candidate MUST be discarded. Unrelated grants, clients and independent management authority retain their eligible results. Shared policy may affect several grants, but each must be within its scope. Token refresh without changed authority and semantically unchanged policy saves are not invalidation triggers.
 
-A revision needs a key as much as a create. Without one, a retried revision whose first attempt succeeded fails with version conflict ([5.2.4](#524-revise)), and the client cannot tell its own success from someone else's revision. Unkeyed repeated withdrawal can append another event even though the entry stays deleted. Hard deletion still requires an unrecoverable entry and prohibits returning it again; its erased-data and personal-audit obligations are not replaced by response-cache invalidation.
+Invalidation MUST survive restart and take effect no later than acknowledgement of the permission change. Invalidated candidates MUST NOT revive or qualify for the copy-expiry exception. Ordinary original-result release and revealing retry replies MUST be ordered against effective authority changes at the release decision; no stale prepared reply may escape after its invalidation. At that decision, a revealing retry reply MUST also satisfy all applicable eligibility conditions, including deadlines, subject only to the exact copy-expiry exception above. This requires neither a specific serialization callback nor waiting for delivery or remote receipt. Original-channel completion retains its limited entitlement under 5.6.
+
+**Retained information.** Providers MAY discard replay-only Context Client content at its original `useUntil`, but MUST preserve duplicate protection and enough permitted historical context to establish the remaining retry conditions throughout the protected interval, including after restart. Eligible results MUST remain recoverable except for the invalidation permitted above; arbitrary early eviction is not an authorization change. This does not erase authoritative entry/history records or recipients' copies. Hard deletion ([5.4.2](#542-hard-deletion)) remains a separate obligation: these rules permit no retention of erased content and no resurrection through a protected old key. They do not settle what operation metadata may survive erasure or establish combined erasure/retry safety.
+
+**Temporary uncertainty.** After the applicable authority checks, if execution is outstanding or its outcome is temporarily indeterminate during recovery, the provider MAY wait for a bounded period. If still unresolved when replying, it MUST return the HTTP-only `idempotency-unresolved` problem with status 503 and `Retry-After`. It MUST NOT execute the operation again while uncertain. Known ineligibility requires denial, not this temporary response. An unrecoverable committed-key state is a failed recovery guarantee, not permission to start fresh.
+
+**Response: HCP Provider → HCP Client (authorized keyed operation temporarily unresolved)**
+
+    HTTP/1.1 503 Service Unavailable
+    Content-Type: application/problem+json
+    HCP-Version: 2.0
+    Retry-After: 1
+
+    {
+      "type": "https://hcp.example/problems/idempotency-unresolved",
+      "title": "Idempotency outcome unresolved",
+      "status": 503,
+      "detail": "Retry the same request and key after the indicated delay."
+    }
+
+This is not a Core/MCP error or a new meaning for `subject-unavailable`; 409 `idempotency-conflict` remains a proven mismatch.
+
+**Client recovery.** Preserve the method, target, key and exact bytes before first dispatch. With known idempotency support, clients MAY make bounded same-request/key retries under the original authority, respecting `Retry-After` or otherwise backing off. Stop comfortably within the supported interval, measured conservatively from first dispatch with delivery time allowed. A new key, replacement grant, changed client identity or expired protection window is not automatic recovery. Corrected input may reuse an unconsumed key only when no attempt under it committed or remains unresolved.
+
+Completion confirms success and the caller can stop; it does not explain why content was omitted or establish that no eligible reference can be recovered. A supported, authorized same-key attempt to recover that result may therefore still be useful. A denial says nothing about an unknown earlier outcome and does not undo known success. A proxy 5xx, timeout or dropped reply supplies no new confirmed outcome; it does not prove provider-side pending execution or rollback. Neither an error status nor a problem body alone establishes no effect. Never automatically resend an unsupported or unkeyed write merely because its reply was lost.
+
+| Retry case within the protected interval | Required outcome |
+|-----------------------------------------|------------------|
+| Exact request, unchanged authority, eligible candidate | Original status and JSON values; one mutation and one set of operation events |
+| Fresh token for the same unchanged grant; ordinary candidate still eligible after an original minimal or lost reply | Original eligible candidate and original deadline |
+| Exact request; only the original content copy expired | Fixed HTTP 200 completion; no content, ref or resource headers |
+| Changed body/operation/target; historical candidate still eligible and both contexts authorized | 409 mismatch; no effect |
+| Changed body/operation/target; historical content copy expired | Opaque denial, not 409 or completion |
+| Invalid evidence, replacement grant, invalidated result or other ineligibility | Authentication/authorization denial; no result-existence detail or new effect |
+| Narrowing then restoration, or restart after precise or permitted conservative invalidation | Candidate stays invalid; committed key remains consumed |
+
+A revision needs a key as much as a create: without one, a repeat may fail its consumed expected-version check without identifying the original success. An unsupported or unkeyed repeated withdrawal can append another event even though the entry stays deleted. These cases do not justify new keys for uncertain operations.
+
 
 ## 9.7 Errors
 
 All error responses MUST use `application/problem+json` per RFC 9457, carrying at minimum `type`, `title`, `status`, and `detail`. Implementations MAY add extension members.
 
-Each Core error ([5.5](#55-errors)) maps to one status. Its problem type is its code, relative to https://hcp.example/problems/:
+Each Core error ([5.5](#55-errors)) maps to one status. The binding-only `idempotency-unresolved` condition has no Core or MCP code. Problem types below are relative to https://hcp.example/problems/:
 
-| Core error ([5.5](#55-errors)) | Status | Problem type |
+| Core error ([5.5](#55-errors)) or HTTP-only condition | Status | Problem type |
 |-----------------------|--------|------------------------|
 | invalid request | 422 | `malformed-request` |
 | unauthenticated | 401 | `invalid-token` |
@@ -2498,6 +2528,7 @@ Each Core error ([5.5](#55-errors)) maps to one status. Its problem type is its 
 | version conflict | 409 | `version-conflict` |
 | credential invalid | 422 | `credential-invalid` |
 | subject unavailable | 503 | `subject-unavailable` |
+| temporarily unresolved keyed operation (HTTP only, [9.6](#96-idempotency)) | 503 | `idempotency-unresolved` |
 | rate limited | 429 | `rate-limited` |
 | unsupported version | 400 | `unsupported-version` |
 
@@ -2607,14 +2638,18 @@ Requirements for every tool:
 
 The schemas below are the HCP-specific part of each tool definition.
 
-For create, revise and withdraw, completion-only success ([5.6](#56-completion-and-response-disclosure)) is an alternative to the ordinary result, not a Core error. The same exact object appears in `structuredContent` and as serialized JSON in the text block. A later tool call has no original-response entitlement, and this draft provides no MCP idempotency-key argument ([9.6](#96-idempotency)).
+For create, revise and withdraw, completion-only success ([5.6](#56-completion-and-response-disclosure)) is an alternative to the ordinary result, not a Core error. The same exact object appears in `structuredContent` and as serialized JSON in the text block. A later tool call has no original-response entitlement, and this draft provides no MCP idempotency-key argument ([9.6](#96-idempotency)). A disconnect leaves the outcome unknown; it does not authorize automatically repeating a write tool call.
 
-**Tool result: HCP Provider → MCP host (committed write, representation withheld; HCP result members)**
+**JSON-RPC response: HCP Provider → MCP host (`tools/call` id 7; committed write, representation withheld)**
 
     {
-      "isError": false,
-      "structuredContent": { "outcome": "committed", "representation": "not-included" },
-      "content": [ { "type": "text", "text": "{\"outcome\":\"committed\",\"representation\":\"not-included\"}" } ]
+      "jsonrpc": "2.0",
+      "id": 7,
+      "result": {
+        "isError": false,
+        "structuredContent": { "outcome": "committed", "representation": "not-included" },
+        "content": [ { "type": "text", "text": "{\"outcome\":\"committed\",\"representation\":\"not-included\"}" } ]
+      }
     }
 
 ### 10.3.1 hcp_queryContext
@@ -3945,7 +3980,7 @@ Identifiers use the placeholder namespace ([1.7](#17-conformance-identifiers)). 
 
 **Core schemas.** One schema each for the request and the result of query, get entry, create, revise, withdraw, reading one's own grant, relinquishing it, and reporting onward sharing ([5.2](#52-context-operations)), of import, the disclosure summary, and the delegations list ([5.4.3](#543-import), [8.6](#86-disclosure-summary), [9.4.13](#9413-delegations)), plus the entry ([4.2](#42-entry), [11](#11-general-context-profile), [14](#14-vc-evidence-profile)), the export ([5.4.1](#541-export)), the disclosure ([7.4](#74-disclosures-to-context-clients)), the grant ([6.1.5](#615-grant-representation)), the delegation ([17.2](#172-delegations)), the standing rule ([6.3](#63-standing-rules)), the directive ([6.4](#64-directives)), the minimization report ([7.5](#75-reporting)), and the Core error ([5.5](#55-errors)), with HTTP problem details ([9.7](#97-errors)). Schemas are written in JSON Schema 2020-12, under a base that names the draft. They are open: they admit members this specification does not define, which an HCP Provider preserves ([A.3](#a3-extension-points)). Where a schema and the text of this specification differ, the text governs.
 
-The completion-only result ([5.6](#56-completion-and-response-disclosure)) is published as `operations/completion-result.json` and referenced by the create, revise, withdraw and import result schemas. Unlike an ordinary extensible entry, it permits exactly its two fixed members. A result schema alone cannot prove that the operation committed, that the caller is authorized, or that the request permits this alternative: a dry-run import and hard deletion do not. Providers must enforce those operation and release rules separately.
+The completion-only result ([5.6](#56-completion-and-response-disclosure), with authorized HTTP retry use under 9.6) is published as `operations/completion-result.json` and referenced by the create, revise, withdraw and import result schemas. Unlike an ordinary extensible entry, it permits exactly its two fixed members. A result schema alone cannot prove that the operation committed, that the caller is authorized, or that the request permits this alternative: a dry-run import and hard deletion do not. Providers must enforce those operation and release rules separately.
 
 **JSON-LD context.** The context is published for semantic interoperability. Conformance requires no JSON-LD processing ([4.1.1](#411-processing-requirements)), and a credential in `evidence` does not reference the HCP context ([14.2](#142-credential-and-signature-boundary)), so no conformance requirement depends on the context resolving. A draft of the key terms, updated for this draft's entry structure:
 

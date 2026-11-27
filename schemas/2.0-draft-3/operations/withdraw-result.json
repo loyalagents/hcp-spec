@@ -45,5 +45,5 @@
       "$ref": "completion-result.json"
     }
   ],
-  "$comment": "5.6 governs when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative."
+  "$comment": "5.6 and 9.6 govern when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative."
 }

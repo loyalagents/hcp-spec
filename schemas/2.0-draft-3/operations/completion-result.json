@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hcp.example/schemas/2.0-draft-3/operations/completion-result.json",
   "title": "Completion-only result",
-  "description": "Exactly the successful completion fact. Only permitted by the operation contract after known successful commit and required durable audit; no resource representation or extra members.",
+  "description": "Exactly the successful completion fact. Only permitted by the operation contract or authorized HTTP retry rules after known successful commit and required durable audit; no resource representation or extra members.",
   "type": "object",
   "properties": {
     "outcome": {

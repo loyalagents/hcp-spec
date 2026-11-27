@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hcp.example/schemas/2.0-draft-3/problem.json",
   "title": "HCP problem details",
-  "description": "A Core error as the HTTP Binding carries it: RFC 9457 problem details (9.7). Defined in 9.7 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "description": "An HTTP Binding problem, including mapped Core errors and the binding-only idempotency-unresolved condition: RFC 9457 problem details (9.7). Defined in 9.7 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
   "type": "object",
   "properties": {
     "type": {
@@ -15,7 +15,8 @@
         "https://hcp.example/problems/credential-invalid",
         "https://hcp.example/problems/rate-limited",
         "https://hcp.example/problems/unsupported-version",
-        "https://hcp.example/problems/subject-unavailable"
+        "https://hcp.example/problems/subject-unavailable",
+        "https://hcp.example/problems/idempotency-unresolved"
       ]
     },
     "title": {
@@ -41,5 +42,23 @@
     "title",
     "status",
     "detail"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "https://hcp.example/problems/idempotency-unresolved"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": 503
+          }
+        }
+      }
+    }
   ]
 }

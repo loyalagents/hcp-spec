@@ -241,11 +241,16 @@ CODES = ['malformed-request', 'invalid-token', 'scope-denied', 'idempotency-conf
          'credential-invalid', 'rate-limited', 'unsupported-version'] + (['subject-unavailable'] if D3 else [])
 schema('error', 'HCP Core error', 'A Core error as a binding carries it: the MCP Binding\'s structuredContent of a tool execution error (10.4).', {
     'type': 'object', 'properties': {'type': {'enum': CODES}, 'detail': S}, 'required': ['type', 'detail']}, '5.5, 10.4')
-schema('problem', 'HCP problem details', 'A Core error as the HTTP Binding carries it: RFC 9457 problem details (9.7).', {
+PROBLEM_CODES = CODES + (['idempotency-unresolved'] if D3 else [])
+schema('problem', 'HCP problem details',
+       ('An HTTP Binding problem, including mapped Core errors and the binding-only idempotency-unresolved condition: RFC 9457 problem details (9.7).'
+        if D3 else 'A Core error as the HTTP Binding carries it: RFC 9457 problem details (9.7).'), {
     'type': 'object',
-    'properties': {'type': {'enum': ['https://hcp.example/problems/' + k for k in CODES]}, 'title': S,
+    'properties': {'type': {'enum': ['https://hcp.example/problems/' + k for k in PROBLEM_CODES]}, 'title': S,
                    'status': {'enum': [400, 401, 403, 409, 422, 429] + ([503] if D3 else [])}, 'detail': S},
-    'required': ['type', 'title', 'status', 'detail']}, '9.7')
+    'required': ['type', 'title', 'status', 'detail'],
+    **({'allOf': [{'if': {'properties': {'type': {'const': 'https://hcp.example/problems/idempotency-unresolved'}}},
+                  'then': {'properties': {'status': {'const': 503}}}}]} if D3 else {})}, '9.7')
 
 # ------------------------------------------------------------------ operations (5.2, 5.4.3, 8.6, 9.4.13)
 def op(name, title, sec, body):
@@ -257,14 +262,14 @@ def rc(frag):
 entry_or_disclosure = {'anyOf': [r('disclosure'), r('entry')],
                        'description': 'A disclosure where the requester is a Context Client (7.4); otherwise the entry.'}
 if D3:
-    op('completion-result', 'Completion-only result', '5.6',
+    op('completion-result', 'Completion-only result', '5.6, 9.6',
        obj({'outcome': {'const': 'committed'}, 'representation': {'const': 'not-included'}},
            ['outcome', 'representation'], additionalProperties=False,
-           description='Exactly the successful completion fact. Only permitted by the operation contract after known successful commit and required durable audit; no resource representation or extra members.'))
+           description='Exactly the successful completion fact. Only permitted by the operation contract or authorized HTTP retry rules after known successful commit and required durable audit; no resource representation or extra members.'))
 def write_result(ordinary):
     # Keep the read union unchanged, and keep Draft 2 output byte-for-byte stable.
     return ({'anyOf': [ordinary, {'$ref': 'completion-result.json'}],
-             '$comment': '5.6 governs when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative.'}
+             '$comment': '5.6 and 9.6 govern when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative.'}
             if D3 else ordinary)
 TS = DT
 op('query-request', 'Query request', '5.2.1', {'type': 'object', 'properties': {

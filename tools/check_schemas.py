@@ -256,7 +256,13 @@ if _OLD is not None:
                   'completion-only rejects missing, changed or additional members: ' + repr(changed))
         ordinary = {**ex('11.4'), **minimal}
         validate('entry', ordinary, 'ordinary stored entry preserves similarly named extensions')
-        validate('operations/create-result', ordinary, 'authorized ordinary result preserves extensions')
+        for operation in ('create', 'revise'):
+            validate('operations/' + operation + '-result', ordinary,
+                     operation + ' accepts an ordinary Management Client entry with extensions')
+            validate('operations/' + operation + '-result', {**ex('9.4.2')['entry'], **minimal},
+                     operation + ' accepts an ordinary Context Client disclosure with extensions')
+            check(not validator('operations/' + operation + '-result').is_valid({**minimal, 'ref': 'r_hidden'}),
+                  operation + ' rejects completion with an added reference')
         check(not validator(name).is_valid(ordinary),
               'ordinary result with marker extensions is never completion-only')
         check(not validator('operations/query-result').is_valid(minimal) and
@@ -276,11 +282,15 @@ if _OLD is not None:
         wire = ex('9.4.3')
         check(wire == minimal, '9.4.3 HTTP completion body contains no resource data')
         http_section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('### 9.4.3 Create', 1)[1].split('### 9.4.4 Revise', 1)[0]
-        header_match = re.search(r'    HTTP/1\.1 201 Created\n((?:    [^\n]+\n)+)\n', http_section)
+        header_match = re.search(r'    HTTP/1\.1 200 OK\n((?:    [^\n]+\n)+)\n', http_section)
         headers = dict(line.strip().split(': ', 1) for line in header_match[1].splitlines()) if header_match else {}
         check(headers == {'Content-Type': 'application/ld+json', 'HCP-Version': '2.0'},
-              '9.4.3 completion example has version/media headers and no resource headers')
-        tool = ex('10.3')
+              '9.4.3 completion uses HTTP 200 with version/media headers and no resource headers')
+        envelope = ex('10.3')
+        check(envelope.get('jsonrpc') == '2.0' and envelope.get('id') == 7 and
+              set(envelope) == {'jsonrpc', 'id', 'result'},
+              '10.3 completion example is a complete JSON-RPC success response')
+        tool = envelope.get('result', {})
         content = tool.get('content', [])
         try:
             text_copy = json.loads(content[0]['text']) if len(content) == 1 and content[0].get('type') == 'text' else None
@@ -289,6 +299,30 @@ if _OLD is not None:
         check(tool.get('isError') is False and tool.get('structuredContent') == minimal and
               text_copy == minimal,
               '10.3 completion success has matching structured and JSON text content')
+
+    temporary = {'type': 'https://hcp.example/problems/idempotency-unresolved',
+                 'title': 'Idempotency outcome unresolved', 'status': 503,
+                 'detail': 'Retry the same request and key after the indicated delay.'}
+    validate('problem', temporary, 'HTTP-only unresolved outcome')
+    for code in ('idempotency-unresolved', temporary['type']):
+        check(not validator('error').is_valid({'type': code, 'detail': 'Retry later.'}),
+              'HTTP-only unresolved outcome is not a Core/MCP error: ' + code)
+    check(not validator('problem').is_valid({**temporary, 'status': 409}),
+          'idempotency-unresolved requires HTTP 503, not mismatch status 409')
+    for key in ('type', 'title', 'status', 'detail'):
+        check(not validator('problem').is_valid({k: v for k, v in temporary.items() if k != key}),
+              'temporary problem requires ' + key)
+    unresolved_examples = EX.get('9.6', [])
+    check(len(unresolved_examples) == 1, '9.6 publishes one concrete temporary HTTP example')
+    if unresolved_examples:
+        validate('problem', unresolved_examples[0], '9.6 temporary HTTP body')
+        check(unresolved_examples[0] == temporary,
+              '9.6 example identifies temporary uncertainty without outcome or resource data')
+    section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('## 9.6 Idempotency', 1)[1].split('## 9.7 Errors', 1)[0]
+    header_match = re.search(r'    HTTP/1\.1 503 Service Unavailable\n((?:    [^\n]+\n)+)\n', section)
+    headers = dict(line.strip().split(': ', 1) for line in header_match[1].splitlines()) if header_match else {}
+    check(headers == {'Content-Type': 'application/problem+json', 'HCP-Version': '2.0', 'Retry-After': '1'},
+          '9.6 temporary HTTP example carries Retry-After and no resource-specific headers')
 
 print('\nFindings (template comparisons):' if findings else '\nNo template findings.')
 for f in findings: print('  - ' + f)
