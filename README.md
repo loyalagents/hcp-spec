@@ -2,6 +2,8 @@
 
 The Human Context Protocol is an open, person-governed standard for representing, storing, and sharing personal AI memory and preferences across systems. Applications and assistants ask a person's HCP instance for the context they need, under explicit authorization, for a purpose the person approved, and for a limited time. The person can see who accessed what and when, correct what is stored, and revoke access at any time.
 
+HCP aims to make personal context portable and connect independently built applications and context providers through a shared interface. It standardizes the behavior callers need to rely on and the protections people need, while preserving providers’ freedom to choose their storage and processing architecture. New requirements should address a concrete interoperability or person-control need, with their implementation cost weighed against that benefit.
+
 **Status.** HCP v2 is a working draft for review. The current draft is **2.0-draft-3** (November 2026). It is not stable: later drafts change the wire format. Do not build production systems against it without following the drafts.
 
 This repository is currently private for invited partner review. Public release is a separate decision. Record both the draft identifier and the Git commit when reviewing or experimenting: corrections can land within a draft before the next numbered draft.

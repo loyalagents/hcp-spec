@@ -23,6 +23,13 @@ identifies current open questions. Link an existing issue or review when your
 feedback concerns the same question. Review findings and proposed remedies are
 not adopted requirements.
 
+For a proposed requirement, explain the concrete use case, what would fail without
+a shared rule, and the implementation burden it introduces. Prefer the smallest
+observable guarantee that solves the problem, and identify which choices remain
+with implementers. Consider whether an example, implementation guide or scoped
+profile would suffice before adding a general requirement. Where permitted
+variation affects callers, explain how they can recognize and handle it.
+
 ## Edit and validate
 
 Small editorial corrections can go directly into a focused PR. Larger technical
