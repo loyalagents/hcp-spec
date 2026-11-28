@@ -11,6 +11,9 @@
     "entryId": {
       "$ref": "../common.json#/$defs/urnUuid"
     },
+    "purpose": {
+      "$ref": "../common.json#/$defs/purposeCode"
+    },
     "expectedVersion": {
       "type": "integer",
       "minimum": 1
@@ -97,7 +100,8 @@
   "required": [
     "expectedVersion",
     "content",
-    "reason"
+    "reason",
+    "purpose"
   ],
   "not": {
     "anyOf": [

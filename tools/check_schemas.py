@@ -12,7 +12,9 @@ Usage: python3 -I tools/check_schemas.py SCHEMA_DIR SOURCE_DIR
   every alternative written "a | b" is a value the schema allows.
 - Cross-member rules: a VC Evidence entry's content.evidence points at an item whose role is content,
   and the credential's subject is the entry's subject (14.2).
-- The MCP tools' inputSchemas (10.3) are valid JSON Schemas, and each property maps to a Core field.
+- The MCP tools' inputSchemas (10.3) are valid JSON Schemas.
+- Draft 3 adds selected request-purpose, HTTP mapping/header/problem, fixed completion-shape,
+  and MCP structured/text consistency checks. These do not test provider runtime behavior.
 Prints PASS/FAIL lines and a list of findings; exit 1 on any FAIL.
 """
 import json, os, re, sys
@@ -188,7 +190,7 @@ validate('operations/query-request', ex('9.4.1', 0), '9.4.1 query request')
 (template if is_template(ex('9.4.2')) else validate)('operations/get-entry-result', ex('9.4.2'), '9.4.2 get entry result')
 validate('disclosure', ex('9.4.2')['entry'], '9.4.2 disclosed entry')
 validate('operations/revise-request', ex('9.4.4'), '9.4.4 revise request')
-(template if is_template(ex('9.4.5')) else validate)('operations/withdraw-result', ex('9.4.5'), '9.4.5 withdraw result')
+(template if is_template(ex('9.4.5', -1)) else validate)('operations/withdraw-result', ex('9.4.5', -1), '9.4.5 withdraw result')
 imp = ex('9.4.11', 0)
 (template if imp.get('export') == {} else validate)('operations/import-request', imp, '9.4.11 import request')
 (template if is_template(ex('9.4.11', 1)) else validate)('operations/import-result', ex('9.4.11', 1), '9.4.11 import result')
@@ -234,6 +236,152 @@ for sec in ('10.3.1', '10.3.2', '10.3.3', '10.3.4', '10.3.5') + (('10.3.6',) if 
     try: Draft202012Validator.check_schema(t['inputSchema']); ok = True
     except Exception as e: ok = False
     check(ok, f'{sec} {t["name"]}: inputSchema is valid JSON Schema 2020-12')
+
+# Draft 3 completion is an exact, content-free result, never an ordinary read.
+# These are artifact checks, not evidence that a provider committed or authorized
+# an operation. The request/release cases in 5.6 and 9.6 need runtime tests.
+if _OLD is not None:
+    # A selected mutation purpose is request metadata, separate from future-use
+    # restrictions. Grant authorization and audit production remain runtime rules.
+    purpose = 'https://purposes.example/trip-planning'
+    for sec, request in [('10.3.1', {'query': 'Travel preferences', 'purpose': purpose}),
+                         ('10.3.2', {'ref': 'r_review', 'purpose': purpose})]:
+        v = Draft202012Validator(ex(sec)['inputSchema'], format_checker=FormatChecker())
+        check(v.is_valid(request), sec + ' accepts an absolute purpose URI')
+        for invalid in ('', 'relative-purpose', 'https://purposes.example/not a code'):
+            check(not v.is_valid({**request, 'purpose': invalid}),
+                  sec + ' rejects invalid purpose: ' + repr(invalid))
+    http_source = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read()
+    withdrawal_rows = [list(map(lambda cell: cell.strip().strip('`'), line.strip('|').split('|')))
+                       for line in http_source.splitlines() if line.startswith('| Withdraw (5.2.5) |')]
+    check(len(withdrawal_rows) == 1 and withdrawal_rows[0][2:] == ['POST', '/v2/entries/{entryId}/withdrawal'],
+          '9.2 maps soft withdrawal to its POST endpoint')
+    withdrawal_section = http_source.split('### 9.4.5 Withdraw and Hard Delete', 1)[1].split('### 9.4.6 Grants', 1)[0]
+    check(bool(re.search(r'^    POST /v2/entries/[^/?\s]+/withdrawal HTTP/1\.1$', withdrawal_section, re.M)),
+          '9.4.5 soft-withdrawal request example uses the POST mapping')
+    create = {
+        'schema': 'https://hcp.example/spec/entry/2.0',
+        'subject': {'id': 'urn:uuid:9a4b6c8d-2e1f-4a61-8b57-97ad11cc843f'},
+        'content': {'profile': 'https://hcp.example/spec/profiles/general-context/2.0',
+                    'value': 'I prefer an aisle seat.'},
+        'classification': {'categories': ['general_preferences']},
+        'assertion': {'declarationType': 'person-declared', 'permittedPurposes': []},
+        'record': {'provenance': {'source': 'person-input'}}, 'purpose': purpose}
+    core_requests = {
+        'create': create,
+        'revise': {'ref': 'r_review', 'expectedVersion': 1, 'content': create['content'],
+                   'reason': 'Correct the preference.', 'purpose': purpose},
+        'withdraw': {'ref': 'r_review', 'reason': 'Remove the preference.', 'purpose': purpose}}
+    tool_requests = {
+        'create': {'categories': ['general_preferences'], 'content': 'I prefer an aisle seat.',
+                   'declarationType': 'person-declared', 'sourceContext': 'person-input',
+                   'permittedPurposes': [], 'purpose': purpose},
+        'revise': {**core_requests['revise'], 'content': 'I prefer a window seat.'},
+        'withdraw': core_requests['withdraw']}
+    for operation, sec in [('create', '10.3.3'), ('revise', '10.3.4'), ('withdraw', '10.3.5')]:
+        for binding, request, v in [
+                ('Core', core_requests[operation], validator('operations/' + operation + '-request')),
+                ('MCP', tool_requests[operation], Draft202012Validator(ex(sec)['inputSchema'], format_checker=FormatChecker()))]:
+            check(v.is_valid(request), binding + ' ' + operation + ' accepts an explicit purpose')
+            for invalid in (None, '', 'relative-purpose', [purpose]):
+                check(not v.is_valid({**request, 'purpose': invalid}),
+                      binding + ' ' + operation + ' rejects invalid purpose: ' + repr(invalid))
+            check(not v.is_valid({k: val for k, val in request.items() if k != 'purpose'}),
+                  binding + ' ' + operation + ' requires an explicit purpose')
+    for sec, operation in [('9.4.3', 'create'), ('9.4.5', 'withdraw')]:
+        check(len(EX.get(sec, [])) == 2, sec + ' publishes concrete request and result examples')
+        if len(EX.get(sec, [])) == 2:
+            validate('operations/' + operation + '-request', ex(sec), sec + ' explicit-purpose request')
+
+    name = 'operations/completion-result'
+    check(sid(name) in schemas, 'Draft 3 publishes the completion-only result schema')
+    if sid(name) in schemas:
+        minimal = {'outcome': 'committed', 'representation': 'not-included'}
+        validate(name, ex('5.6'), '5.6 exact completion-only example')
+        check(ex('5.6') == minimal, '5.6 example is exactly the fixed completion fact')
+        for operation in ('create', 'revise', 'withdraw', 'import'):
+            validate('operations/' + operation + '-result', minimal,
+                     operation + ' result schema admits the fixed completion shape')
+        for changed in ({}, {'outcome': 'committed'},
+                        {**minimal, 'representation': 'included'},
+                        *({**minimal, key: 'withheld'} for key in
+                          ('id', 'ref', 'version', 'timestamp', 'content', 'detail'))):
+            check(not validator(name).is_valid(changed),
+                  'completion-only rejects missing, changed or additional members: ' + repr(changed))
+        ordinary = {**ex('11.4'), **minimal}
+        validate('entry', ordinary, 'ordinary stored entry preserves similarly named extensions')
+        for operation in ('create', 'revise'):
+            validate('operations/' + operation + '-result', ordinary,
+                     operation + ' accepts an ordinary Management Client entry with extensions')
+            validate('operations/' + operation + '-result', {**ex('9.4.2')['entry'], **minimal},
+                     operation + ' accepts an ordinary Context Client disclosure with extensions')
+            check(not validator('operations/' + operation + '-result').is_valid({**minimal, 'ref': 'r_hidden'}),
+                  operation + ' rejects completion with an added reference')
+        check(not validator(name).is_valid(ordinary),
+              'ordinary result with marker extensions is never completion-only')
+        check(not validator('operations/query-result').is_valid(minimal) and
+              not validator('operations/get-entry-result').is_valid(minimal),
+              'query and get do not admit completion-only results')
+        check(not validator('operations/query-result').is_valid({**ex('9.4.1', 1), 'entries': [minimal]}) and
+              not validator('operations/get-entry-result').is_valid({**ex('9.4.2'), 'entry': minimal}),
+              'read entry unions do not admit completion in place of an entry')
+        validate('operations/withdraw-result', {
+            'entryId': 'urn:uuid:7d1e4b2a-0c9f-4a61-8e3d-5b6a7c8d9e0f',
+            'status': 'deleted', 'hardDeleted': True, 'timestamp': '2026-10-27T15:40:00Z'},
+            'ordinary hard-delete result matches its schema')
+        validate('operations/import-result', {'outcomes': [], 'dryRun': True},
+                 'ordinary empty dry-run import remains valid')
+        check(not validator(name).is_valid({**minimal, 'dryRun': True}),
+              'a dry-run member cannot be smuggled into completion-only')
+        wire = ex('9.4.3', -1)
+        check(wire == minimal, '9.4.3 HTTP completion body contains no resource data')
+        http_section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('### 9.4.3 Create', 1)[1].split('### 9.4.4 Revise', 1)[0]
+        header_match = re.search(r'    HTTP/1\.1 200 OK\n((?:    [^\n]+\n)+)\n', http_section)
+        headers = dict(line.strip().split(': ', 1) for line in header_match[1].splitlines()) if header_match else {}
+        check(headers == {'Content-Type': 'application/ld+json', 'HCP-Version': '2.0'},
+              '9.4.3 completion uses HTTP 200 with version/media headers and no resource headers')
+        envelope = ex('10.3')
+        check(envelope.get('jsonrpc') == '2.0' and envelope.get('id') == 7 and
+              set(envelope) == {'jsonrpc', 'id', 'result'},
+              '10.3 completion example is a complete JSON-RPC success response')
+        tool = envelope.get('result', {})
+        content = tool.get('content', [])
+        try:
+            text_copy = json.loads(content[0]['text']) if len(content) == 1 and content[0].get('type') == 'text' else None
+        except (KeyError, ValueError, TypeError):
+            text_copy = None
+        check(tool.get('isError') is False and tool.get('structuredContent') == minimal and
+              text_copy == minimal,
+              '10.3 completion success has matching structured and JSON text content')
+
+    temporary = {'type': 'https://hcp.example/problems/idempotency-unresolved',
+                 'title': 'Idempotency outcome unresolved', 'status': 503,
+                 'detail': 'Retry the same request and key after the indicated delay.'}
+    validate('problem', temporary, 'HTTP-only unresolved outcome')
+    problem_rows = [list(map(lambda cell: cell.strip().strip('`'), line.strip('|').split('|')))
+                        for line in http_source.split('## 9.7 ', 1)[1].split('## 9.8 ', 1)[0].splitlines()
+                        if line.startswith('|') and '`idempotency-unresolved`' in line]
+    check(len(problem_rows) == 1 and problem_rows[0][1:] == ['503', 'idempotency-unresolved'],
+          '9.7 HTTP-only problem row agrees with the checked temporary response')
+    for code in ('idempotency-unresolved', temporary['type']):
+        check(not validator('error').is_valid({'type': code, 'detail': 'Retry later.'}),
+              'HTTP-only unresolved outcome is not a Core/MCP error: ' + code)
+    check(not validator('problem').is_valid({**temporary, 'status': 409}),
+          'idempotency-unresolved requires HTTP 503, not mismatch status 409')
+    for key in ('type', 'title', 'status', 'detail'):
+        check(not validator('problem').is_valid({k: v for k, v in temporary.items() if k != key}),
+              'temporary problem requires ' + key)
+    unresolved_examples = EX.get('9.6', [])
+    check(len(unresolved_examples) == 1, '9.6 publishes one concrete temporary HTTP example')
+    if unresolved_examples:
+        validate('problem', unresolved_examples[0], '9.6 temporary HTTP body')
+        check(unresolved_examples[0] == temporary,
+              '9.6 example identifies temporary uncertainty without outcome or resource data')
+    section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('## 9.6 Idempotency', 1)[1].split('## 9.7 Errors', 1)[0]
+    header_match = re.search(r'    HTTP/1\.1 503 Service Unavailable\n((?:    [^\n]+\n)+)\n', section)
+    headers = dict(line.strip().split(': ', 1) for line in header_match[1].splitlines()) if header_match else {}
+    check(headers == {'Content-Type': 'application/problem+json', 'HCP-Version': '2.0', 'Retry-After': '1'},
+          '9.6 temporary HTTP example carries Retry-After and no resource-specific headers')
 
 print('\nFindings (template comparisons):' if findings else '\nNo template findings.')
 for f in findings: print('  - ' + f)

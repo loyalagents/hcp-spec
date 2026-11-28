@@ -2,13 +2,22 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hcp.example/schemas/2.0-draft-3/operations/create-result.json",
   "title": "Create result",
-  "description": "A disclosure where the requester is a Context Client (7.4); otherwise the entry.",
+  "description": "Create result. Defined in 5.2.3, 5.6 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
   "anyOf": [
     {
-      "$ref": "../disclosure.json"
+      "anyOf": [
+        {
+          "$ref": "../disclosure.json"
+        },
+        {
+          "$ref": "../entry.json"
+        }
+      ],
+      "description": "A disclosure where the requester is a Context Client (7.4); otherwise the entry."
     },
     {
-      "$ref": "../entry.json"
+      "$ref": "completion-result.json"
     }
-  ]
+  ],
+  "$comment": "5.6 and 9.6 govern when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative."
 }

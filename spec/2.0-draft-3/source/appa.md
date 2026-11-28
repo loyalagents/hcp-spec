@@ -41,6 +41,7 @@ Each registry lists the values defined in this draft. The meaning of each value 
 | Security event types | `https://hcp.example/spec/events/grant-revoked` | 9.9 | By later versions of this specification |
 | Initiator roles | `management-client`, `context-client`, `authorization-service`, `hcp-provider` | 3.9 | No |
 | Core error codes | `malformed-request`, `invalid-token`, `scope-denied`, `idempotency-conflict`, `version-conflict`, `credential-invalid`, `subject-unavailable`, `rate-limited`, `unsupported-version` | 5.5 | No |
+| HTTP-only problem types | `idempotency-unresolved` | 9.6, 9.7 | By later versions of this specification |
 | VC securing mechanisms | `eddsa-rdfc-2022`, `ecdsa-sd-2023`, `vc-jose-cose` | 14.5, 19 | By later versions of this specification |
 | Conflict detection methods | No values registered; providers declare their own | 15.2, 19 | Yes |
 | Authorization detail types | `https://hcp.example/spec/authorization/context-access` | 6.1.5, 13.3 | By later versions of this specification |
@@ -72,6 +73,8 @@ Identifiers use the placeholder namespace (1.7). Dates are given in each draft's
 | Conformance identifiers | https://hcp.example/spec/... | Conformance claims (18.1) | Compared as exact strings; need not resolve (1.7) |
 
 **Core schemas.** One schema each for the request and the result of query, get entry, create, revise, withdraw, reading one's own grant, relinquishing it, and reporting onward sharing (5.2), of import, the disclosure summary, and the delegations list (5.4.3, 8.6, 9.4.13), plus the entry (4.2, 11, 14), the export (5.4.1), the disclosure (7.4), the grant (6.1.5), the delegation (17.2), the standing rule (6.3), the directive (6.4), the minimization report (7.5), and the Core error (5.5), with HTTP problem details (9.7). Schemas are written in JSON Schema 2020-12, under a base that names the draft. They are open: they admit members this specification does not define, which an HCP Provider preserves (A.3). Where a schema and the text of this specification differ, the text governs.
+
+The completion-only result (5.6, 9.6) is published as `operations/completion-result.json` and referenced by the create, revise, withdraw and import result schemas. Unlike an ordinary extensible entry, it permits exactly its two fixed members. A result schema alone cannot prove that the operation committed, that the caller is authorized, or that the request permits this alternative: a dry-run import and hard deletion do not. Providers must enforce those operation and release rules separately.
 
 **JSON-LD context.** The context is published for semantic interoperability. Conformance requires no JSON-LD processing (4.1.1), and a credential in `evidence` does not reference the HCP context (14.2), so no conformance requirement depends on the context resolving. A draft of the key terms, updated for this draft's entry structure:
 

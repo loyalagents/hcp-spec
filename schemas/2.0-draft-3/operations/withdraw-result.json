@@ -2,40 +2,48 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hcp.example/schemas/2.0-draft-3/operations/withdraw-result.json",
   "title": "Withdraw result",
-  "description": "Withdraw result. Defined in 5.2.5, 9.4.5 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
-  "type": "object",
-  "properties": {
-    "ref": {
-      "type": "string"
+  "description": "Withdraw result. Defined in 5.2.5, 5.6, 9.4.5 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "entryId": {
+          "$ref": "../common.json#/$defs/urnUuid"
+        },
+        "status": {
+          "const": "deleted"
+        },
+        "hardDeleted": {
+          "type": "boolean"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "status",
+        "timestamp"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        },
+        {
+          "required": [
+            "entryId"
+          ]
+        }
+      ]
     },
-    "entryId": {
-      "$ref": "../common.json#/$defs/urnUuid"
-    },
-    "status": {
-      "const": "deleted"
-    },
-    "hardDeleted": {
-      "type": "boolean"
-    },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
+    {
+      "$ref": "completion-result.json"
     }
-  },
-  "required": [
-    "status",
-    "timestamp"
   ],
-  "oneOf": [
-    {
-      "required": [
-        "ref"
-      ]
-    },
-    {
-      "required": [
-        "entryId"
-      ]
-    }
-  ]
+  "$comment": "5.6 and 9.6 govern when completion is permitted. Schema validity alone does not establish commit or authority; dry-run import and hard deletion do not gain this alternative."
 }

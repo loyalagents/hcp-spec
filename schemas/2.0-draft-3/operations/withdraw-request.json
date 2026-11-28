@@ -14,9 +14,13 @@
     "reason": {
       "type": "string",
       "minLength": 1
+    },
+    "purpose": {
+      "$ref": "../common.json#/$defs/purposeCode"
     }
   },
   "required": [
-    "reason"
+    "reason",
+    "purpose"
   ]
 }
