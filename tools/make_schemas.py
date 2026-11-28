@@ -288,6 +288,7 @@ op('get-entry-result', 'Get entry result', '5.2.2', {'type': 'object', 'properti
     **({'directives': arr(r('directive'))} if D3 else {})},
     'required': ['entry', 'retrievalId', 'minimization', 'timestamp']})
 op('create-request', 'Create request', '5.2.3, 9.4.3', {'type': 'object', 'properties': {
+    **({'purpose': rc('purposeCode')} if D3 else {}),
     'schema': {'const': 'https://hcp.example/spec/entry/2.0'},
     'subject': obj({'id': S}, ['id']), 'content': rc('content'), 'evidence': rc('evidence'),
     'classification': rc('classification'), 'assertion': rc('assertion'),
@@ -295,20 +296,21 @@ op('create-request', 'Create request', '5.2.3, 9.4.3', {'type': 'object', 'prope
                    'relationships': arr(obj(dict({'type': rc('relationshipType'), 'target': S},
                                                  **({'proposal': obj({'act': {'enum': ['reject', 'accept', 'supersede']}, 'entry': S, 'rationale': S, 'weighed': arr(S, minItems=1)},
                                                                      ['act', 'entry', 'rationale', 'weighed'])} if D3 else {})), ['type', 'target']))}, ['provenance'])},
-    'required': ['schema', 'subject', 'content', 'classification', 'assertion', 'record'],
-    '$comment': 'An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider.'})
+    'required': ['schema', 'subject', 'content', 'classification', 'assertion', 'record'] + (['purpose'] if D3 else []),
+    '$comment': ('purpose is request metadata, not a stored entry member (6.1.5.2). ' if D3 else '') + 'An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider.'})
 op('create-result', 'Create result', '5.2.3, 5.6' if D3 else '5.2.3', write_result(entry_or_disclosure))
 op('revise-request', 'Revise request', '5.2.4, 9.4.4', {'type': 'object', 'properties': dict(named_entry, **{
+    **({'purpose': rc('purposeCode')} if D3 else {}),
     'expectedVersion': {'type': 'integer', 'minimum': 1}, 'content': rc('content'), 'evidence': rc('evidence'),
     'reason': {'type': 'string', 'minLength': 1},
     'assertion': obj({'declarationType': rc('declarationType'), 'confidence': rc('confidence'), 'validUntil': nullable(DT)}),
     'record': obj({'provenance': obj({'assertedBy': obj({'id': S}, ['id']), 'assertedAt': DT, 'source': S}),
                    'relationships': arr(obj({'type': rc('relationshipType'), 'target': S}, ['type', 'target']))})}),
-    'required': ['expectedVersion', 'content', 'reason'],
+    'required': ['expectedVersion', 'content', 'reason'] + (['purpose'] if D3 else []),
     'not': {'anyOf': [{'required': ['subject']}, {'required': ['classification']}]},
     '$comment': 'A revision does not change subject or classification (5.2.4). The HTTP Binding names the entry in the path (9.4.4).'})
 op('revise-result', 'Revise result', '5.2.4, 5.6' if D3 else '5.2.4', write_result(entry_or_disclosure))
-op('withdraw-request', 'Withdraw request', '5.2.5', {'type': 'object', 'properties': dict(named_entry, reason={'type': 'string', 'minLength': 1}), 'required': ['reason']})
+op('withdraw-request', 'Withdraw request', '5.2.5', {'type': 'object', 'properties': dict(named_entry, reason={'type': 'string', 'minLength': 1}, **({'purpose': rc('purposeCode')} if D3 else {})), 'required': ['reason'] + (['purpose'] if D3 else [])})
 op('withdraw-result', 'Withdraw result', '5.2.5, 5.6, 9.4.5' if D3 else '5.2.5, 9.4.5', write_result({'type': 'object', 'properties': dict(named_entry, **{
     'status': {'const': 'deleted'}, 'hardDeleted': {'type': 'boolean'}, 'timestamp': TS}), 'required': ['status', 'timestamp'],
     ('oneOf' if D3 else 'anyOf'): [{'required': ['ref']}, {'required': ['entryId']}]}))

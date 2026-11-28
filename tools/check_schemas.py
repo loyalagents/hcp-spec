@@ -188,7 +188,7 @@ validate('operations/query-request', ex('9.4.1', 0), '9.4.1 query request')
 (template if is_template(ex('9.4.2')) else validate)('operations/get-entry-result', ex('9.4.2'), '9.4.2 get entry result')
 validate('disclosure', ex('9.4.2')['entry'], '9.4.2 disclosed entry')
 validate('operations/revise-request', ex('9.4.4'), '9.4.4 revise request')
-(template if is_template(ex('9.4.5')) else validate)('operations/withdraw-result', ex('9.4.5'), '9.4.5 withdraw result')
+(template if is_template(ex('9.4.5', -1)) else validate)('operations/withdraw-result', ex('9.4.5', -1), '9.4.5 withdraw result')
 imp = ex('9.4.11', 0)
 (template if imp.get('export') == {} else validate)('operations/import-request', imp, '9.4.11 import request')
 (template if is_template(ex('9.4.11', 1)) else validate)('operations/import-result', ex('9.4.11', 1), '9.4.11 import result')
@@ -239,6 +239,43 @@ for sec in ('10.3.1', '10.3.2', '10.3.3', '10.3.4', '10.3.5') + (('10.3.6',) if 
 # These are artifact checks, not evidence that a provider committed or authorized
 # an operation. The request/release cases in 5.6 and 9.6 need runtime tests.
 if _OLD is not None:
+    # A selected mutation purpose is request metadata, separate from future-use
+    # restrictions. Grant authorization and audit production remain runtime rules.
+    purpose = 'https://purposes.example/trip-planning'
+    create = {
+        'schema': 'https://hcp.example/spec/entry/2.0',
+        'subject': {'id': 'urn:uuid:9a4b6c8d-2e1f-4a61-8b57-97ad11cc843f'},
+        'content': {'profile': 'https://hcp.example/spec/profiles/general-context/2.0',
+                    'value': 'I prefer an aisle seat.'},
+        'classification': {'categories': ['general_preferences']},
+        'assertion': {'declarationType': 'person-declared', 'permittedPurposes': []},
+        'record': {'provenance': {'source': 'synthetic-review'}}, 'purpose': purpose}
+    core_requests = {
+        'create': create,
+        'revise': {'ref': 'r_review', 'expectedVersion': 1, 'content': create['content'],
+                   'reason': 'Correct the preference.', 'purpose': purpose},
+        'withdraw': {'ref': 'r_review', 'reason': 'Remove the preference.', 'purpose': purpose}}
+    tool_requests = {
+        'create': {'categories': ['general_preferences'], 'content': 'I prefer an aisle seat.',
+                   'declarationType': 'person-declared', 'sourceContext': 'synthetic-review',
+                   'permittedPurposes': [], 'purpose': purpose},
+        'revise': {**core_requests['revise'], 'content': 'I prefer a window seat.'},
+        'withdraw': core_requests['withdraw']}
+    for operation, sec in [('create', '10.3.3'), ('revise', '10.3.4'), ('withdraw', '10.3.5')]:
+        for binding, request, v in [
+                ('Core', core_requests[operation], validator('operations/' + operation + '-request')),
+                ('MCP', tool_requests[operation], Draft202012Validator(ex(sec)['inputSchema'], format_checker=FormatChecker()))]:
+            check(v.is_valid(request), binding + ' ' + operation + ' accepts an explicit purpose')
+            for invalid in (None, '', 'relative-purpose', [purpose]):
+                check(not v.is_valid({**request, 'purpose': invalid}),
+                      binding + ' ' + operation + ' rejects invalid purpose: ' + repr(invalid))
+            check(not v.is_valid({k: val for k, val in request.items() if k != 'purpose'}),
+                  binding + ' ' + operation + ' requires an explicit purpose')
+    for sec, operation in [('9.4.3', 'create'), ('9.4.5', 'withdraw')]:
+        check(len(EX.get(sec, [])) == 2, sec + ' publishes concrete request and result examples')
+        if len(EX.get(sec, [])) == 2:
+            validate('operations/' + operation + '-request', ex(sec), sec + ' explicit-purpose request')
+
     name = 'operations/completion-result'
     check(sid(name) in schemas, 'Draft 3 publishes the completion-only result schema')
     if sid(name) in schemas:
@@ -279,7 +316,7 @@ if _OLD is not None:
                  'ordinary empty dry-run import remains valid')
         check(not validator(name).is_valid({**minimal, 'dryRun': True}),
               'a dry-run member cannot be smuggled into completion-only')
-        wire = ex('9.4.3')
+        wire = ex('9.4.3', -1)
         check(wire == minimal, '9.4.3 HTTP completion body contains no resource data')
         http_section = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read().split('### 9.4.3 Create', 1)[1].split('### 9.4.4 Revise', 1)[0]
         header_match = re.search(r'    HTTP/1\.1 200 OK\n((?:    [^\n]+\n)+)\n', http_section)

@@ -5,6 +5,9 @@
   "description": "Create request. Defined in 5.2.3, 9.4.3 of the HCP v2 specification (2.0-draft-3); where this schema and the text differ, the text governs.",
   "type": "object",
   "properties": {
+    "purpose": {
+      "$ref": "../common.json#/$defs/purposeCode"
+    },
     "schema": {
       "const": "https://hcp.example/spec/entry/2.0"
     },
@@ -121,7 +124,8 @@
     "content",
     "classification",
     "assertion",
-    "record"
+    "record",
+    "purpose"
   ],
-  "$comment": "An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider."
+  "$comment": "purpose is request metadata, not a stored entry member (6.1.5.2). An entry in the form of 4.2 carrying the fields of 5.2.3 and omitting those the provider assigns (9.4.3). assertedBy.id is required except for person-declared entries and credential content (5.2.3); that rule depends on content and is checked by the provider."
 }
