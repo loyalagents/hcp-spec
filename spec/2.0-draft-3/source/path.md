@@ -22,6 +22,8 @@ Draft 4 will take in comments on Draft 3, the findings of the HCP Development an
 
 This table is not a complete readiness checklist. Open technical questions include [E2E confidentiality and delivery (#22)](https://github.com/loyalagents/hcp-spec/issues/22) and [hard deletion and replay (#23)](https://github.com/loyalagents/hcp-spec/issues/23). Their remedies and implications for a final release remain subject to review.
 
+[Mutation authority (#38)](https://github.com/loyalagents/hcp-spec/issues/38) still owns target-purpose restrictions, the person's correction authority, and category coverage for revision and withdrawal; requiring a named write purpose does not settle those questions. [In-flight revocation (#2)](https://github.com/loyalagents/hcp-spec/issues/2) tracks the remaining handoff and ordering questions. Maintainers and implementers should revisit these issues before treating the affected draft behavior as final.
+
 ## P1.2 Done in Draft 2
 
 Δ CHANGED (v2-draft-3) --- Renamed from "Planned for Draft 2".
@@ -122,6 +124,8 @@ The changelog is in P3. A v1 → v2 section map recording where each v1 section 
 | 2.0-draft-1 | October 11, 2026 | Restructured into Parts with Core, bindings, profiles, and implementation guides; the actor and provenance model; per-Part conformance identifiers and packages; the corrections that restructuring touched. The invariant counts in 1.0-draft-4 are corrected: seven adopted, eight deferred. |
 | 2.0-draft-2 | October 29, 2026 | One entry model with evidence, relationships and a status lifecycle; purposes and structured authorization; disclosures with use-until and revocation reach; Security Event Token notifications; structured audit and a disclosure summary; import; credential status and one mandatory securing mechanism; Health and Education Context Profiles; the Delegated Authorization Profile; standing rules; inputs from the October 2026 Portable Memory workshop. |
 | 2.0-draft-3 | November 6, 2026 | Four pages: Introduction, Specification, Guides, Path to v2 Final; Terms and References. Several categories per entry, described in discovery; the basis and permitted purposes of an assertion; provenance on request. Conflict proposals and issuer-attested conflicts. Directives for agents and the first client claim. One level of sub-delegation, and delegated attestation. End-to-end encrypted storage. Onward sharing of Low-sensitivity context with the person's approval. Security and Privacy Considerations. An overview, worked use cases, a comparison with related protocols, and deployment patterns. Examples labelled by direction; concrete HTTP examples; RFC 3339 times. |
+
+**Working revision, November 27, 2026 ([PR #49](https://github.com/loyalagents/hcp-spec/pull/49)).** Intervening corrections to Draft 3 separate committed-write completion from response disclosure (5.6), require an explicit purpose for create, revise and withdraw (6.1.5.2), move HTTP soft withdrawal to POST (9.4.5), and define authorized HTTP retries and a temporary unresolved-outcome response (9.6, 9.7). The historical November 6 draft summary above is unchanged; use a commit-specific link to identify the working text reviewed.
 
 A v1 → v2 section map, recording where each v1 section went and listing every rule tightened in the move, is available on request.
 

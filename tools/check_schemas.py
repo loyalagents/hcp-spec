@@ -12,7 +12,9 @@ Usage: python3 -I tools/check_schemas.py SCHEMA_DIR SOURCE_DIR
   every alternative written "a | b" is a value the schema allows.
 - Cross-member rules: a VC Evidence entry's content.evidence points at an item whose role is content,
   and the credential's subject is the entry's subject (14.2).
-- The MCP tools' inputSchemas (10.3) are valid JSON Schemas, and each property maps to a Core field.
+- The MCP tools' inputSchemas (10.3) are valid JSON Schemas.
+- Draft 3 adds selected request-purpose, HTTP mapping/header/problem, fixed completion-shape,
+  and MCP structured/text consistency checks. These do not test provider runtime behavior.
 Prints PASS/FAIL lines and a list of findings; exit 1 on any FAIL.
 """
 import json, os, re, sys
@@ -242,6 +244,21 @@ if _OLD is not None:
     # A selected mutation purpose is request metadata, separate from future-use
     # restrictions. Grant authorization and audit production remain runtime rules.
     purpose = 'https://purposes.example/trip-planning'
+    for sec, request in [('10.3.1', {'query': 'Travel preferences', 'purpose': purpose}),
+                         ('10.3.2', {'ref': 'r_review', 'purpose': purpose})]:
+        v = Draft202012Validator(ex(sec)['inputSchema'], format_checker=FormatChecker())
+        check(v.is_valid(request), sec + ' accepts an absolute purpose URI')
+        for invalid in ('', 'relative-purpose', 'https://purposes.example/not a code'):
+            check(not v.is_valid({**request, 'purpose': invalid}),
+                  sec + ' rejects invalid purpose: ' + repr(invalid))
+    http_source = open(os.path.join(SRC, 's9.md'), encoding='utf-8').read()
+    withdrawal_rows = [list(map(lambda cell: cell.strip().strip('`'), line.strip('|').split('|')))
+                       for line in http_source.splitlines() if line.startswith('| Withdraw (5.2.5) |')]
+    check(len(withdrawal_rows) == 1 and withdrawal_rows[0][2:] == ['POST', '/v2/entries/{entryId}/withdrawal'],
+          '9.2 maps soft withdrawal to its POST endpoint')
+    withdrawal_section = http_source.split('### 9.4.5 Withdraw and Hard Delete', 1)[1].split('### 9.4.6 Grants', 1)[0]
+    check(bool(re.search(r'^    POST /v2/entries/[^/?\s]+/withdrawal HTTP/1\.1$', withdrawal_section, re.M)),
+          '9.4.5 soft-withdrawal request example uses the POST mapping')
     create = {
         'schema': 'https://hcp.example/spec/entry/2.0',
         'subject': {'id': 'urn:uuid:9a4b6c8d-2e1f-4a61-8b57-97ad11cc843f'},
@@ -249,7 +266,7 @@ if _OLD is not None:
                     'value': 'I prefer an aisle seat.'},
         'classification': {'categories': ['general_preferences']},
         'assertion': {'declarationType': 'person-declared', 'permittedPurposes': []},
-        'record': {'provenance': {'source': 'synthetic-review'}}, 'purpose': purpose}
+        'record': {'provenance': {'source': 'person-input'}}, 'purpose': purpose}
     core_requests = {
         'create': create,
         'revise': {'ref': 'r_review', 'expectedVersion': 1, 'content': create['content'],
@@ -257,7 +274,7 @@ if _OLD is not None:
         'withdraw': {'ref': 'r_review', 'reason': 'Remove the preference.', 'purpose': purpose}}
     tool_requests = {
         'create': {'categories': ['general_preferences'], 'content': 'I prefer an aisle seat.',
-                   'declarationType': 'person-declared', 'sourceContext': 'synthetic-review',
+                   'declarationType': 'person-declared', 'sourceContext': 'person-input',
                    'permittedPurposes': [], 'purpose': purpose},
         'revise': {**core_requests['revise'], 'content': 'I prefer a window seat.'},
         'withdraw': core_requests['withdraw']}
@@ -284,7 +301,7 @@ if _OLD is not None:
         check(ex('5.6') == minimal, '5.6 example is exactly the fixed completion fact')
         for operation in ('create', 'revise', 'withdraw', 'import'):
             validate('operations/' + operation + '-result', minimal,
-                     operation + ' admits completion when its operation contract allows it')
+                     operation + ' result schema admits the fixed completion shape')
         for changed in ({}, {'outcome': 'committed'},
                         {**minimal, 'representation': 'included'},
                         *({**minimal, key: 'withheld'} for key in
@@ -311,7 +328,7 @@ if _OLD is not None:
         validate('operations/withdraw-result', {
             'entryId': 'urn:uuid:7d1e4b2a-0c9f-4a61-8e3d-5b6a7c8d9e0f',
             'status': 'deleted', 'hardDeleted': True, 'timestamp': '2026-10-27T15:40:00Z'},
-            'ordinary hard-delete result remains valid; its contract does not select completion')
+            'ordinary hard-delete result matches its schema')
         validate('operations/import-result', {'outcomes': [], 'dryRun': True},
                  'ordinary empty dry-run import remains valid')
         check(not validator(name).is_valid({**minimal, 'dryRun': True}),
@@ -341,6 +358,11 @@ if _OLD is not None:
                  'title': 'Idempotency outcome unresolved', 'status': 503,
                  'detail': 'Retry the same request and key after the indicated delay.'}
     validate('problem', temporary, 'HTTP-only unresolved outcome')
+    problem_rows = [list(map(lambda cell: cell.strip().strip('`'), line.strip('|').split('|')))
+                        for line in http_source.split('## 9.7 ', 1)[1].split('## 9.8 ', 1)[0].splitlines()
+                        if line.startswith('|') and '`idempotency-unresolved`' in line]
+    check(len(problem_rows) == 1 and problem_rows[0][1:] == ['503', 'idempotency-unresolved'],
+          '9.7 HTTP-only problem row agrees with the checked temporary response')
     for code in ('idempotency-unresolved', temporary['type']):
         check(not validator('error').is_valid({'type': code, 'detail': 'Retry later.'}),
               'HTTP-only unresolved outcome is not a Core/MCP error: ' + code)

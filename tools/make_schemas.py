@@ -262,10 +262,10 @@ def rc(frag):
 entry_or_disclosure = {'anyOf': [r('disclosure'), r('entry')],
                        'description': 'A disclosure where the requester is a Context Client (7.4); otherwise the entry.'}
 if D3:
-    op('completion-result', 'Completion-only result', '5.6, 9.6',
+    schema('operations/completion-result', 'Completion-only result',
+       'Exactly the successful completion fact. Only permitted by the operation contract or authorized HTTP retry rules after known successful commit and required durable audit; no resource representation or extra members.',
        obj({'outcome': {'const': 'committed'}, 'representation': {'const': 'not-included'}},
-           ['outcome', 'representation'], additionalProperties=False,
-           description='Exactly the successful completion fact. Only permitted by the operation contract or authorized HTTP retry rules after known successful commit and required durable audit; no resource representation or extra members.'))
+           ['outcome', 'representation'], additionalProperties=False), '5.6, 9.6')
 def write_result(ordinary):
     # Keep the read union unchanged, and keep Draft 2 output byte-for-byte stable.
     return ({'anyOf': [ordinary, {'$ref': 'completion-result.json'}],

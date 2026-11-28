@@ -71,8 +71,8 @@ implementation documentation when available.
 Section numbers below are Draft 3's. Draft 2's schemas, in `schemas/2.0-draft-2/`, follow Draft 2's numbering (its 25.2 is Draft 3's A.2).
 
 - Each schema's `$id` is under `https://hcp.example/schemas/<draft>/`. `hcp.example` is a placeholder namespace (section 1.7) and does not resolve. Resolve references locally, from the schema directory.
-- Schemas are open: members the specification does not define are allowed, because a provider must preserve them (4.2, A.3). Where the text says a member is withheld, as for an entry's `id` in a disclosure (7.4), the schema forbids it.
-- Some rules relate members to each other in ways a schema cannot state. Two of them are checked by `tools/check_schemas.py`: a VC Evidence entry's `content.evidence` names an item whose role is `content`, and the credential's subject is the entry's subject (14.2). The rest are left to implementations.
+- Schemas are generally open: members the specification does not define are allowed, because a provider must preserve them (4.2, A.3). Where the text says a member is withheld, as for an entry's `id` in a disclosure (7.4), the schema forbids it. The completion-only result (5.6) is closed: it contains exactly two fixed members.
+- Some rules relate members to each other in ways a schema cannot state. Selected checks in `tools/check_schemas.py` cover VC Evidence relationships (14.2), MCP structured/text consistency, and HTTP request and problem examples. Authorization, commit ordering, audit durability and other runtime rules remain implementation responsibilities.
 - **Where a schema and the text differ, the text governs** (A.2). Please report a difference as an issue.
 
 | Schema | Section |
@@ -86,6 +86,7 @@ Section numbers below are Draft 3's. Draft 2's schemas, in `schemas/2.0-draft-2/
 | `export.json` | 5.4.1 (Draft 3) |
 | `minimization-report.json` | 7.5 |
 | `error.json`, `problem.json` | 5.5, 10.4; 9.7 |
+| `operations/completion-result.json` | 5.6, 9.6 (Draft 3) |
 | `operations/` | 5.2.1 to 5.2.6, 5.2.8, 5.4.3, 8.6, 9.4.13: request and result of query, get entry, create, revise and withdraw; reading one's own grant; reporting onward sharing (Draft 3); import; the disclosure summary; the delegations list |
 | `audit-event.json`, `discovery.json` | 8.2, 19 |
 | `common.json` | Shared definitions |
